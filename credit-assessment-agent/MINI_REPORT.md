@@ -14,9 +14,9 @@
 
 **Rule:** If `budget_utilisation_ratio < 0.10` (revenue covers <10% of monthly budget) → override to `No-Go`.
 
-**Threshold:** 10% is conservative. Even accounting for seasonal revenue dips, a company spending 10× its revenue is structurally insolvent for lending purposes. The threshold is a named constant (`BUDGET_BURN_THRESHOLD`) in `agent/guardrails.py` — tunable upward (e.g. 20–30%) based on analyst feedback without code changes to the rule logic.
+**Threshold selection:** Among rows with `MonthlyBudget > 0`, utilisation is heavily left-skewed (median ≈ 1%). Candidate cuts at 30%/40%/50% would flag ~92–94% of that subset and are too blunt as a hard override. **10%** is used as a catastrophic-coverage financial hard stop — still a clear lending red flag, while missing ratios do not fire. The constant `BUDGET_BURN_THRESHOLD` in `agent/guardrails.py` is tunable.
 
-**Rationale:** Strong client engagement cannot compensate for catastrophic unit economics. The guardrail catches cases where the LLM is swayed by retention or growth metrics while ignoring that the company will default on any capital it receives. Missing ratio data (`None`) does not trigger the rule — we do not penalise companies for data gaps.
+**Rationale:** Strong client engagement cannot compensate for catastrophic unit economics. The guardrail catches cases where the LLM is swayed by retention or growth metrics while ignoring that the company cannot service growth capital. This satisfies the assignment requirement for at least one hard financial guardrail that overrides the LLM.
 
 ---
 
@@ -57,8 +57,11 @@ For model drift, if the underlying LLM is updated by the provider, run the offli
 
 ## 4. Example Assessments
 
-*(Populate with 3 actual runs after deployment — one `Continue`, one `Review`, one guardrail override)*
+| CompanyID | Expected path | Guardrail | Notes |
+|---|---|---|---|
+| `COMPANY_0088` | **Continue** | No | Active; util ≈ 5.9×; retention ≈ 0.47 |
+| `COMPANY_0001` | **Review** | No | Active; missing budget utilisation; weak retention |
+| `COMPANY_0093` | **No-Go** | Yes — status hard stop | Closed; shows LLM override in UI |
 
-| CompanyID | LLM Verdict | Guardrail Fired | Final Verdict | Key Signals |
-|---|---|---|---|---|
-| — | — | — | — | Run `streamlit run app/streamlit_app.py` to generate |
+Streamlit demos: sidebar → **Demonstration profiles**.  
+CLI: `python scripts/batch_assess.py --demo-three`

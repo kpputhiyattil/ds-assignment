@@ -372,6 +372,14 @@ def main() -> None:
     # -----------------------------------------------------------------------
     st.sidebar.header("Select Company")
 
+    # Assignment demos: Continue / Review / Guardrail override
+    DEMO_CASES = {
+        "(none — pick below)": None,
+        "Demo 1 · Continue (strong coverage)": "COMPANY_0088",
+        "Demo 2 · Review (mixed / weak util)": "COMPANY_0001",
+        "Demo 3 · No-Go guardrail (closed)": "COMPANY_0093",
+    }
+
     try:
         company_ids = loader.list_company_ids()
     except Exception as exc:
@@ -392,9 +400,23 @@ def main() -> None:
         )
         st.stop()
 
+    demo_label = st.sidebar.selectbox(
+        "Demonstration profiles",
+        options=list(DEMO_CASES.keys()),
+        help=(
+            "Three fixed demos for the assignment: Continue, Review, and a "
+            "hard-guardrail No-Go override."
+        ),
+    )
+    demo_id = DEMO_CASES[demo_label]
+    default_index = 0
+    if demo_id and demo_id in company_ids:
+        default_index = company_ids.index(demo_id)
+
     selected_id = st.sidebar.selectbox(
         "Company ID",
         options=company_ids,
+        index=default_index,
         help="Select a company to assess for growth capital eligibility.",
     )
 

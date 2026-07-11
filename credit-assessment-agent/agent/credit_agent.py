@@ -344,6 +344,79 @@ def _coerce_assessment(
     )
 
 
+# Continue bar for post-LLM calibration (aligned with prompt / peer distribution).
+# Cleared of extreme-burn guardrail; adequate engagement; active only.
+_CONTINUE_UTIL_FLOOR = 0.10
+_CONTINUE_RETENTION_FLOOR = 0.15
+_CONTINUE_STRONG_UTIL = 1.0
+
+
+def _promote_continue_if_eligible(
+    assessment: AssessmentResult,
+    tool_outputs: dict[str, Any],
+) -> AssessmentResult:
+    """
+    If the LLM returned Review/No-Go but tool signals clearly clear the Continue bar,
+    promote to Continue. Guardrails still run afterward and can force No-Go.
+
+    Rationale: on this dataset most firms have util << 1.0; models often under-use
+    Continue. This deterministic uplift only applies to active firms that already
+    clear the hard budget-burn floor and show adequate retention.
+    """
+    if assessment.recommendation == Recommendation.CONTINUE:
+        return assessment
+
+    profile = tool_outputs.get("business_profile") or {}
+    financials = tool_outputs.get("financial_health") or {}
+    engagement = tool_outputs.get("client_engagement") or {}
+
+    status = profile.get("status_flag")
+    util = financials.get("budget_utilisation_ratio")
+    retention = engagement.get("retention_rate")
+
+    if status != "active" or util is None or util < _CONTINUE_UTIL_FLOOR:
+        return assessment
+    if retention is None:
+        return assessment
+
+    # Strong util: retention only needs to be non-trivial
+    # Moderate util (clears burn): require adequate retention
+    eligible = (
+        (util >= _CONTINUE_STRONG_UTIL and retention >= _CONTINUE_RETENTION_FLOOR)
+        or (
+            util >= _CONTINUE_UTIL_FLOOR
+            and retention >= max(_CONTINUE_RETENTION_FLOOR, 0.25)
+        )
+    )
+    if not eligible:
+        return assessment
+
+    note = (
+        f"[CONTINUE CALIBRATION] Active company with budget_utilisation_ratio={util} "
+        f"and retention_rate={retention} meets the adequate first-pass Continue bar "
+        f"(util≥{_CONTINUE_UTIL_FLOOR}, retention≥{_CONTINUE_RETENTION_FLOOR}). "
+        f"LLM had recommended {assessment.recommendation.value}."
+    )
+    logger.info(
+        "Promoting %s → Continue (util=%s retention=%s)",
+        assessment.recommendation.value,
+        util,
+        retention,
+    )
+    return AssessmentResult(
+        recommendation=Recommendation.CONTINUE,
+        confidence=Confidence.MEDIUM
+        if assessment.confidence == Confidence.LOW
+        else assessment.confidence,
+        rationale=f"{note}\n\n{assessment.rationale}",
+        tool_outputs=assessment.tool_outputs or tool_outputs,
+        guardrail_fired=False,
+        guardrail_reason="",
+        steps=assessment.steps,
+        error=assessment.error,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Tool output extractor
 # ---------------------------------------------------------------------------
@@ -603,6 +676,8 @@ class CreditAgent:
             verdict_dict.get("confidence"),
         )
         assessment = _coerce_assessment(verdict_dict, tool_outputs, messages)
+        # Soft Continue calibration before hard guardrails (guardrails still win)
+        assessment = _promote_continue_if_eligible(assessment, tool_outputs)
         return self._guardrails.run(tool_outputs, assessment)
 
     def _request_verdict_fallback(

@@ -15,7 +15,15 @@ Design principles
 Current rules (in priority order)
 ----------------------------------
 1. Company Status Hard Stop  — inactive / suspended / closed → No-Go
-2. Extreme Budget Burn       — budget_utilisation_ratio < 0.10 → No-Go
+2. Extreme Budget Burn       — budget_utilisation_ratio < BUDGET_BURN_THRESHOLD → No-Go
+
+Threshold note (budget burn)
+----------------------------
+BUDGET_BURN_THRESHOLD = 0.10 (10%). Among rows with MonthlyBudget > 0, util is
+heavily left-skewed (median near ~1%). Cuts at 30/40/50% would flag ~92–94% of
+that subset and are too blunt. 10% is a catastrophic-coverage hard stop that
+still fires often enough to be a meaningful financial guardrail for the
+assignment, while missing ratios do not fire.
 """
 
 from __future__ import annotations
@@ -34,8 +42,8 @@ logger = logging.getLogger(__name__)
 # Statuses that trigger an immediate No-Go regardless of financials
 NON_ACTIVE_STATUSES: frozenset[str] = frozenset({"inactive", "suspended", "closed"})
 
-# Revenue must cover at least this fraction of monthly budget
-# 0.10 = 10% — revenue covers less than 10% of costs → structurally insolvent
+# Hard financial guardrail (assignment requirement).
+# Revenue must cover at least this fraction of monthly budget.
 BUDGET_BURN_THRESHOLD: float = 0.10
 
 
