@@ -216,3 +216,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- Project-specific ----
+# Raw and processed data (never commit data to git)
+data/raw/
+data/processed/
+data/artifacts/
+
+# Generated reports (figures are reproduced by the pipeline)
+reports/figures/
+
+# Model artifacts
+*.cbm
+*.pkl
+*.joblib
+*.json.model
+
+# Notebook outputs (keep clean diffs; outputs are re-generated)
+notebooks/.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db

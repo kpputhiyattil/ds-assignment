@@ -1,0 +1,427 @@
+[
+  {
+    "LandLordID": "LANDLORD_5976",
+    "band": "good",
+    "AdjustedScore": 0.5467117890004738,
+    "oof_pred": 0.44258272889832256,
+    "TenantCount": 23,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": 0.027518341801323204,
+        "feature_value": 10.862068965517242,
+        "label": "Average tenant client base",
+        "description": "Mean number of active clients that tenant companies report.",
+        "value_display": "10.9",
+        "direction": "increased",
+        "explanation": "Average tenant client base was 10.9, which increased the predicted landlord quality score by 0.0275. (Mean number of active clients that tenant companies report.)"
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": 0.012734006692500233,
+        "feature_value": 0.3793103448275862,
+        "label": "Average tenant sales intensity",
+        "description": "Mean sales-of-main-product signal across tenant companies.",
+        "value_display": "0.3793",
+        "direction": "increased",
+        "explanation": "Average tenant sales intensity was 0.3793, which increased the predicted landlord quality score by 0.0127. (Mean sales-of-main-product signal across tenant companies.)"
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": 0.007575296260903291,
+        "feature_value": 29.0,
+        "label": "Reported active companies",
+        "description": "Number of companies the landlord reports as active tenants.",
+        "value_display": "29",
+        "direction": "increased",
+        "explanation": "Reported active companies was 29, which increased the predicted landlord quality score by 0.0076. (Number of companies the landlord reports as active tenants.)"
+      },
+      {
+        "feature": "PortfolioSize",
+        "shap_value": 0.00744205267128361,
+        "feature_value": 29,
+        "label": "Matched tenant count",
+        "description": "How many tenant companies were matched for this landlord in the data.",
+        "value_display": "29",
+        "direction": "increased",
+        "explanation": "Matched tenant count was 29, which increased the predicted landlord quality score by 0.0074. (How many tenant companies were matched for this landlord in the data.)"
+      },
+      {
+        "feature": "PortfolioStdBudget",
+        "shap_value": 0.007304085655846797,
+        "feature_value": 13847.358786858958,
+        "label": "Budget variation across tenants",
+        "description": "How much tenant monthly budgets vary (standard deviation).",
+        "value_display": "13,847",
+        "direction": "increased",
+        "explanation": "Budget variation across tenants was 13,847, which increased the predicted landlord quality score by 0.0073. (How much tenant monthly budgets vary (standard deviation).)"
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": -0.013430072620026831,
+        "feature_value": 0.7150223451422154,
+        "label": "Average tenant client retention",
+        "description": "Mean share of returning clients among tenants (loyalty / stickiness).",
+        "value_display": "71.5%",
+        "direction": "decreased",
+        "explanation": "Average tenant client retention was 71.5%, which decreased the predicted landlord quality score by 0.0134. (Mean share of returning clients among tenants (loyalty / stickiness).)"
+      },
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": -0.00638114435136525,
+        "feature_value": 6229.12,
+        "label": "Average tenant monthly budget",
+        "description": "Mean monthly budget across the landlord\u2019s matched tenant companies.",
+        "value_display": "6,229",
+        "direction": "decreased",
+        "explanation": "Average tenant monthly budget was 6,229, which decreased the predicted landlord quality score by 0.0064. (Mean monthly budget across the landlord\u2019s matched tenant companies.)"
+      }
+    ],
+    "waterfall_path": "reports/figures/shap/case_studies/waterfall_good_LANDLORD_5976.png",
+    "narrative": "Landlord `LANDLORD_5976` is a **good** case with historical AdjustedScore 0.5467, and the model predicted 0.4426 (based on 23 matched tenants). What pushed the score up: Average tenant client base was 10.9 (+0.0275); Average tenant sales intensity was 0.3793 (+0.0127); Reported active companies was 29 (+0.0076). What pulled the score down: Average tenant client retention was 71.5% (-0.0134); Average tenant monthly budget was 6,229 (-0.0064). These are model associations used to explain the prediction \u2014 not proof that the landlord caused those tenant outcomes."
+  },
+  {
+    "LandLordID": "LANDLORD_8695",
+    "band": "good",
+    "AdjustedScore": 0.5369464343681425,
+    "oof_pred": 0.44499511256648827,
+    "TenantCount": 25,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": 0.024634146100823418,
+        "feature_value": 16.307692307692307,
+        "label": "Average tenant client base",
+        "description": "Mean number of active clients that tenant companies report.",
+        "value_display": "16.3",
+        "direction": "increased",
+        "explanation": "Average tenant client base was 16.3, which increased the predicted landlord quality score by 0.0246. (Mean number of active clients that tenant companies report.)"
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": 0.011528139611802766,
+        "feature_value": 0.2564102564102564,
+        "label": "Average tenant sales intensity",
+        "description": "Mean sales-of-main-product signal across tenant companies.",
+        "value_display": "0.2564",
+        "direction": "increased",
+        "explanation": "Average tenant sales intensity was 0.2564, which increased the predicted landlord quality score by 0.0115. (Mean sales-of-main-product signal across tenant companies.)"
+      },
+      {
+        "feature": "PortfolioSize",
+        "shap_value": 0.009665679013772976,
+        "feature_value": 39,
+        "label": "Matched tenant count",
+        "description": "How many tenant companies were matched for this landlord in the data.",
+        "value_display": "39",
+        "direction": "increased",
+        "explanation": "Matched tenant count was 39, which increased the predicted landlord quality score by 0.0097. (How many tenant companies were matched for this landlord in the data.)"
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": 0.009060625430712274,
+        "feature_value": 39.0,
+        "label": "Reported active companies",
+        "description": "Number of companies the landlord reports as active tenants.",
+        "value_display": "39",
+        "direction": "increased",
+        "explanation": "Reported active companies was 39, which increased the predicted landlord quality score by 0.0091. (Number of companies the landlord reports as active tenants.)"
+      },
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": 0.004496748564757108,
+        "feature_value": 1.0,
+        "label": "Share of active tenants",
+        "description": "Fraction of matched tenants labelled as currently active / seeking work.",
+        "value_display": "100.0%",
+        "direction": "increased",
+        "explanation": "Share of active tenants was 100.0%, which increased the predicted landlord quality score by 0.0045. (Fraction of matched tenants labelled as currently active / seeking work.)"
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": -0.013775441642419102,
+        "feature_value": 0.724205398179502,
+        "label": "Average tenant client retention",
+        "description": "Mean share of returning clients among tenants (loyalty / stickiness).",
+        "value_display": "72.4%",
+        "direction": "decreased",
+        "explanation": "Average tenant client retention was 72.4%, which decreased the predicted landlord quality score by 0.0138. (Mean share of returning clients among tenants (loyalty / stickiness).)"
+      }
+    ],
+    "waterfall_path": "reports/figures/shap/case_studies/waterfall_good_LANDLORD_8695.png",
+    "narrative": "Landlord `LANDLORD_8695` is a **good** case with historical AdjustedScore 0.5369, and the model predicted 0.4450 (based on 25 matched tenants). What pushed the score up: Average tenant client base was 16.3 (+0.0246); Average tenant sales intensity was 0.2564 (+0.0115); Matched tenant count was 39 (+0.0097). What pulled the score down: Average tenant client retention was 72.4% (-0.0138). These are model associations used to explain the prediction \u2014 not proof that the landlord caused those tenant outcomes."
+  },
+  {
+    "LandLordID": "LANDLORD_5634",
+    "band": "bad",
+    "AdjustedScore": 0.2483812997335113,
+    "oof_pred": 0.29702211376873466,
+    "TenantCount": 25,
+    "top_positive_drivers": [
+      {
+        "feature": "TotalPopulationAround",
+        "shap_value": 0.00031691872400386984,
+        "feature_value": 841693.1637,
+        "label": "Nearby population",
+        "description": "Population living around the landlord\u2019s location.",
+        "value_display": "841,693.2",
+        "direction": "increased",
+        "explanation": "Nearby population was 841,693.2, which increased the predicted landlord quality score by 0.0003. (Population living around the landlord\u2019s location.)"
+      },
+      {
+        "feature": "LandlordAge",
+        "shap_value": 0.0002204677331576806,
+        "feature_value": 8.0,
+        "label": "Landlord age (years)",
+        "description": "How long the landlord has been operating (years since founding).",
+        "value_display": "8",
+        "direction": "increased",
+        "explanation": "Landlord age (years) was 8, which increased the predicted landlord quality score by 0.0002. (How long the landlord has been operating (years since founding).)"
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": -0.0381873300806329,
+        "feature_value": 1813555.39177,
+        "label": "Average tenant monthly budget",
+        "description": "Mean monthly budget across the landlord\u2019s matched tenant companies.",
+        "value_display": "1,813,555",
+        "direction": "decreased",
+        "explanation": "Average tenant monthly budget was 1,813,555, which decreased the predicted landlord quality score by 0.0382. (Mean monthly budget across the landlord\u2019s matched tenant companies.)"
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": -0.028186075735844463,
+        "feature_value": 20.037037037037038,
+        "label": "Average tenant sales intensity",
+        "description": "Mean sales-of-main-product signal across tenant companies.",
+        "value_display": "20.04",
+        "direction": "decreased",
+        "explanation": "Average tenant sales intensity was 20.04, which decreased the predicted landlord quality score by 0.0282. (Mean sales-of-main-product signal across tenant companies.)"
+      },
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": -0.0218316912984716,
+        "feature_value": 173.4814814814815,
+        "label": "Average tenant client base",
+        "description": "Mean number of active clients that tenant companies report.",
+        "value_display": "173.5",
+        "direction": "decreased",
+        "explanation": "Average tenant client base was 173.5, which decreased the predicted landlord quality score by 0.0218. (Mean number of active clients that tenant companies report.)"
+      },
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": -0.017075228663861963,
+        "feature_value": 0.96,
+        "label": "Share of active tenants",
+        "description": "Fraction of matched tenants labelled as currently active / seeking work.",
+        "value_display": "96.0%",
+        "direction": "decreased",
+        "explanation": "Share of active tenants was 96.0%, which decreased the predicted landlord quality score by 0.0171. (Fraction of matched tenants labelled as currently active / seeking work.)"
+      },
+      {
+        "feature": "PortfolioStdBudget",
+        "shap_value": -0.015482703040796195,
+        "feature_value": 6212782.86696596,
+        "label": "Budget variation across tenants",
+        "description": "How much tenant monthly budgets vary (standard deviation).",
+        "value_display": "6,212,783",
+        "direction": "decreased",
+        "explanation": "Budget variation across tenants was 6,212,783, which decreased the predicted landlord quality score by 0.0155. (How much tenant monthly budgets vary (standard deviation).)"
+      }
+    ],
+    "waterfall_path": "reports/figures/shap/case_studies/waterfall_bad_LANDLORD_5634.png",
+    "narrative": "Landlord `LANDLORD_5634` is a **bad** case with historical AdjustedScore 0.2484, and the model predicted 0.2970 (based on 25 matched tenants). What pushed the score up: Nearby population was 841,693.2 (+0.0003); Landlord age (years) was 8 (+0.0002). What pulled the score down: Average tenant monthly budget was 1,813,555 (-0.0382); Average tenant sales intensity was 20.04 (-0.0282); Average tenant client base was 173.5 (-0.0218). These are model associations used to explain the prediction \u2014 not proof that the landlord caused those tenant outcomes."
+  },
+  {
+    "LandLordID": "LANDLORD_10894",
+    "band": "bad",
+    "AdjustedScore": 0.2224006383969599,
+    "oof_pred": 0.354566597835225,
+    "TenantCount": 6,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": 0.01142256756763294,
+        "feature_value": 24.833333333333332,
+        "label": "Average tenant client base",
+        "description": "Mean number of active clients that tenant companies report.",
+        "value_display": "24.8",
+        "direction": "increased",
+        "explanation": "Average tenant client base was 24.8, which increased the predicted landlord quality score by 0.0114. (Mean number of active clients that tenant companies report.)"
+      },
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": 0.0022273933907283796,
+        "feature_value": 0.22798316532586513,
+        "label": "Average tenant client retention",
+        "description": "Mean share of returning clients among tenants (loyalty / stickiness).",
+        "value_display": "22.8%",
+        "direction": "increased",
+        "explanation": "Average tenant client retention was 22.8%, which increased the predicted landlord quality score by 0.0022. (Mean share of returning clients among tenants (loyalty / stickiness).)"
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": -0.12881037573404505,
+        "feature_value": 0.3333333333333333,
+        "label": "Share of active tenants",
+        "description": "Fraction of matched tenants labelled as currently active / seeking work.",
+        "value_display": "33.3%",
+        "direction": "decreased",
+        "explanation": "Share of active tenants was 33.3%, which decreased the predicted landlord quality score by 0.1288. (Fraction of matched tenants labelled as currently active / seeking work.)"
+      },
+      {
+        "feature": "LandlordAge",
+        "shap_value": -0.018613504884558377,
+        "feature_value": 22.0,
+        "label": "Landlord age (years)",
+        "description": "How long the landlord has been operating (years since founding).",
+        "value_display": "22",
+        "direction": "decreased",
+        "explanation": "Landlord age (years) was 22, which decreased the predicted landlord quality score by 0.0186. (How long the landlord has been operating (years since founding).)"
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": -0.018578453948930793,
+        "feature_value": 21.5,
+        "label": "Average tenant sales intensity",
+        "description": "Mean sales-of-main-product signal across tenant companies.",
+        "value_display": "21.50",
+        "direction": "decreased",
+        "explanation": "Average tenant sales intensity was 21.50, which decreased the predicted landlord quality score by 0.0186. (Mean sales-of-main-product signal across tenant companies.)"
+      },
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": -0.007914328045060074,
+        "feature_value": 4420.527880000001,
+        "label": "Average tenant monthly budget",
+        "description": "Mean monthly budget across the landlord\u2019s matched tenant companies.",
+        "value_display": "4,421",
+        "direction": "decreased",
+        "explanation": "Average tenant monthly budget was 4,421, which decreased the predicted landlord quality score by 0.0079. (Mean monthly budget across the landlord\u2019s matched tenant companies.)"
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": -0.0050654041495774285,
+        "feature_value": 11.0,
+        "label": "Reported active companies",
+        "description": "Number of companies the landlord reports as active tenants.",
+        "value_display": "11",
+        "direction": "decreased",
+        "explanation": "Reported active companies was 11, which decreased the predicted landlord quality score by 0.0051. (Number of companies the landlord reports as active tenants.)"
+      }
+    ],
+    "waterfall_path": "reports/figures/shap/case_studies/waterfall_bad_LANDLORD_10894.png",
+    "narrative": "Landlord `LANDLORD_10894` is a **bad** case with historical AdjustedScore 0.2224, and the model predicted 0.3546 (based on 6 matched tenants). What pushed the score up: Average tenant client base was 24.8 (+0.0114); Average tenant client retention was 22.8% (+0.0022). What pulled the score down: Share of active tenants was 33.3% (-0.1288); Landlord age (years) was 22 (-0.0186); Average tenant sales intensity was 21.50 (-0.0186). These are model associations used to explain the prediction \u2014 not proof that the landlord caused those tenant outcomes."
+  },
+  {
+    "LandLordID": "LANDLORD_3491",
+    "band": "neutral",
+    "AdjustedScore": 0.4381628279305444,
+    "oof_pred": 0.388286699867177,
+    "TenantCount": 5,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": 0.004877798619672856,
+        "feature_value": 1.8333333333333333,
+        "label": "Average tenant sales intensity",
+        "description": "Mean sales-of-main-product signal across tenant companies.",
+        "value_display": "1.833",
+        "direction": "increased",
+        "explanation": "Average tenant sales intensity was 1.833, which increased the predicted landlord quality score by 0.0049. (Mean sales-of-main-product signal across tenant companies.)"
+      },
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": 0.003944308586464169,
+        "feature_value": 1.0,
+        "label": "Share of active tenants",
+        "description": "Fraction of matched tenants labelled as currently active / seeking work.",
+        "value_display": "100.0%",
+        "direction": "increased",
+        "explanation": "Share of active tenants was 100.0%, which increased the predicted landlord quality score by 0.0039. (Fraction of matched tenants labelled as currently active / seeking work.)"
+      },
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": 0.00294233888445861,
+        "feature_value": 760.4,
+        "label": "Average tenant monthly budget",
+        "description": "Mean monthly budget across the landlord\u2019s matched tenant companies.",
+        "value_display": "760.40",
+        "direction": "increased",
+        "explanation": "Average tenant monthly budget was 760.40, which increased the predicted landlord quality score by 0.0029. (Mean monthly budget across the landlord\u2019s matched tenant companies.)"
+      },
+      {
+        "feature": "PreferredIndustry",
+        "shap_value": 0.0011802214938628271,
+        "feature_value": "Consumer Durables",
+        "label": "Preferred industry",
+        "description": "Industry focus the landlord prefers for tenants.",
+        "value_display": "Consumer Durables",
+        "direction": "increased",
+        "explanation": "Preferred industry was Consumer Durables, which increased the predicted landlord quality score by 0.0012. (Industry focus the landlord prefers for tenants.)"
+      },
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": 0.000777955594436843,
+        "feature_value": 0.41912240197025924,
+        "label": "Average tenant client retention",
+        "description": "Mean share of returning clients among tenants (loyalty / stickiness).",
+        "value_display": "41.9%",
+        "direction": "increased",
+        "explanation": "Average tenant client retention was 41.9%, which increased the predicted landlord quality score by 0.0008. (Mean share of returning clients among tenants (loyalty / stickiness).)"
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanSuccessScore",
+        "shap_value": -0.002244210151293015,
+        "feature_value": 0.5816314247579405,
+        "label": "Average tenant success score",
+        "description": "Mean composite company-success score across the tenant portfolio.",
+        "value_display": "58.2%",
+        "direction": "decreased",
+        "explanation": "Average tenant success score was 58.2%, which decreased the predicted landlord quality score by 0.0022. (Mean composite company-success score across the tenant portfolio.)"
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": -0.0012364404365087073,
+        "feature_value": 6.0,
+        "label": "Reported active companies",
+        "description": "Number of companies the landlord reports as active tenants.",
+        "value_display": "6",
+        "direction": "decreased",
+        "explanation": "Reported active companies was 6, which decreased the predicted landlord quality score by 0.0012. (Number of companies the landlord reports as active tenants.)"
+      },
+      {
+        "feature": "PortfolioSize",
+        "shap_value": -0.0006521587391963998,
+        "feature_value": 6,
+        "label": "Matched tenant count",
+        "description": "How many tenant companies were matched for this landlord in the data.",
+        "value_display": "6",
+        "direction": "decreased",
+        "explanation": "Matched tenant count was 6, which decreased the predicted landlord quality score by 0.0007. (How many tenant companies were matched for this landlord in the data.)"
+      },
+      {
+        "feature": "TotalPopulationAround",
+        "shap_value": -6.944015895040271e-05,
+        "feature_value": 167379.2131,
+        "label": "Nearby population",
+        "description": "Population living around the landlord\u2019s location.",
+        "value_display": "167,379.2",
+        "direction": "decreased",
+        "explanation": "Nearby population was 167,379.2, which decreased the predicted landlord quality score by 0.0001. (Population living around the landlord\u2019s location.)"
+      }
+    ],
+    "waterfall_path": "reports/figures/shap/case_studies/waterfall_neutral_LANDLORD_3491.png",
+    "narrative": "Landlord `LANDLORD_3491` is a **neutral** case with historical AdjustedScore 0.4382, and the model predicted 0.3883 (based on 5 matched tenants). What pushed the score up: Average tenant sales intensity was 1.833 (+0.0049); Share of active tenants was 100.0% (+0.0039); Average tenant monthly budget was 760.40 (+0.0029). What pulled the score down: Average tenant success score was 58.2% (-0.0022); Reported active companies was 6 (-0.0012); Matched tenant count was 6 (-0.0007). These are model associations used to explain the prediction \u2014 not proof that the landlord caused those tenant outcomes."
+  }
+]

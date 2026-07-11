@@ -1,0 +1,20 @@
+feature,label,mean_abs_shap
+PortfolioMeanClients,Average tenant client base,0.013199063295471011
+PortfolioMeanBudget,Average tenant monthly budget,0.008028600848485308
+PortfolioActiveRate,Share of active tenants,0.00745064726405518
+PortfolioMeanSales,Average tenant sales intensity,0.006214900543422332
+PortfolioMeanRetention,Average tenant client retention,0.0060636635435288916
+PortfolioMeanSuccessScore,Average tenant success score,0.003812899771663151
+PortfolioSize,Matched tenant count,0.002009553708649523
+ActiveCompanies,Reported active companies,0.0019619276207849716
+PortfolioStdBudget,Budget variation across tenants,0.0012905003591724658
+PortfolioStdSuccessScore,Success-score variation across tenants,0.0011855828202420157
+OriginCountry,Origin country,0.0006694018957243964
+OriginCity,Origin city,0.0006547708543091787
+LandlordAge,Landlord age (years),0.0006076759725429201
+PreferredIndustry,Preferred industry,0.0005810433175163208
+AreaPerCompany,Area per company,0.00022738678367276922
+PopulationPerCompany,Population per company,0.00020386385574049153
+Area,Property / campus area,0.00011097942073584995
+TotalPopulationAround,Nearby population,9.831536011977799e-05
+PopulationDensity,Population density,6.568354118872177e-05

@@ -1,0 +1,332 @@
+"""
+ingestion.py — Load raw data files and build the landlord-company bridge.
+
+Public API
+----------
+load_landlords()                   -> pd.DataFrame
+load_companies()                   -> pd.DataFrame
+parse_all_company_id(value, fmt)   -> list[str]
+build_landlord_company_bridge(...) -> pd.DataFrame  [(LandLordID, CompanyID)]
+build_model_base(...)              -> (bridge, model_base)
+
+AllCompanyID format handling
+----------------------------
+The raw LandLords file stores AllCompanyID in several possible formats:
+  - Python list already parsed by pandas/pyarrow   -> ['C1', 'C2']
+  - JSON string                                     -> '["C1","C2"]'
+  - Comma-separated string                          -> 'C1,C2'
+  - Single scalar (string or numeric)               -> 'C1'  or  123
+
+parse_all_company_id handles all four with fmt='auto' (default).
+Pass fmt='json', fmt='csv', or fmt='list' to force a specific parser.
+"""
+from __future__ import annotations
+
+import ast
+import json
+import logging
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+
+from src.config import cfg
+
+logger = logging.getLogger(__name__)
+
+# Raw Companies.parquet uses a space in "Monthly budget"; normalise on load.
+COMPANY_COLUMN_ALIASES = {
+    "Monthly budget": "MonthlyBudget",
+}
+
+# Strip whitespace / blank→NA on these object columns after load.
+LANDLORD_STRIP_COLS = [
+    "PreferredIndustry", "LandlordOriginCity", "LandlordOriginCountry",
+]
+COMPANY_STRIP_COLS = [
+    "CompanyStatus", "PrimaryType", "OriginCity", "OriginCountry",
+]
+
+
+def _clean_string_columns(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
+    """Strip leading/trailing whitespace; convert blank strings to NA."""
+    out = df.copy()
+    for col in cols:
+        if col not in out.columns:
+            continue
+        s = out[col]
+        mask = s.map(lambda v: isinstance(v, str))
+        if mask.any():
+            stripped = s.where(~mask, s.map(lambda v: v.strip() if isinstance(v, str) else v))
+            stripped = stripped.replace("", pd.NA)
+            # Normalise casing collisions for geo / status-like fields
+            out[col] = stripped
+    return out
+
+# ---------------------------------------------------------------------------
+# Raw loaders
+# ---------------------------------------------------------------------------
+
+
+def _infer_loader(path: Path) -> pd.DataFrame:
+    """Load a file based on its suffix (parquet or CSV/TSV)."""
+    suffix = path.suffix.lower()
+    if suffix == ".parquet":
+        return pd.read_parquet(path)
+    elif suffix == ".csv":
+        return pd.read_csv(path, low_memory=False)
+    elif suffix in {".tsv", ".txt"}:
+        return pd.read_csv(path, sep="\t", low_memory=False)
+    else:
+        raise ValueError(f"Unsupported file type: {suffix!r} for {path}")
+
+
+def load_landlords(path: str | Path | None = None) -> pd.DataFrame:
+    """
+    Load raw LandLords data.
+
+    Parameters
+    ----------
+    path : override path; defaults to cfg["paths"]["raw_landlords"]
+
+    Returns
+    -------
+    pd.DataFrame with one row per landlord.
+    """
+    if path is None:
+        path = Path(cfg["paths"]["raw_landlords"])
+    else:
+        path = Path(path)
+
+    if not path.exists():
+        raise FileNotFoundError(
+            f"LandLords file not found: {path}\n"
+            "Check paths.raw_landlords in configs/training_config.yaml"
+        )
+
+    df = _infer_loader(path)
+    df = _clean_string_columns(df, LANDLORD_STRIP_COLS)
+    logger.info(
+        "Loaded LandLords: %d rows, %d columns from %s",
+        len(df), df.shape[1], path,
+    )
+    return df
+
+
+def load_companies(path: str | Path | None = None) -> pd.DataFrame:
+    """
+    Load raw Companies data.
+
+    Parameters
+    ----------
+    path : override path; defaults to cfg["paths"]["raw_companies"]
+
+    Returns
+    -------
+    pd.DataFrame with one row per company.
+    """
+    if path is None:
+        path = Path(cfg["paths"]["raw_companies"])
+    else:
+        path = Path(path)
+
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Companies file not found: {path}\n"
+            "Check paths.raw_companies in configs/training_config.yaml"
+        )
+
+    df = _infer_loader(path)
+    rename = {src: dst for src, dst in COMPANY_COLUMN_ALIASES.items() if src in df.columns}
+    if rename:
+        df = df.rename(columns=rename)
+        logger.info("Renamed company columns: %s", rename)
+    df = _clean_string_columns(df, COMPANY_STRIP_COLS)
+    logger.info(
+        "Loaded Companies: %d rows, %d columns from %s",
+        len(df), df.shape[1], path,
+    )
+    return df
+
+
+# ---------------------------------------------------------------------------
+# AllCompanyID parsing
+# ---------------------------------------------------------------------------
+
+
+def parse_all_company_id(value: Any, fmt: str = "auto") -> list:
+    """
+    Parse a single AllCompanyID value into a list of string company IDs.
+
+    Parameters
+    ----------
+    value : the raw cell value (list, str, int, float, None)
+    fmt   : 'auto' | 'list' | 'json' | 'csv'
+            'auto' tries each format in order.
+
+    Returns
+    -------
+    list[str] — may be empty if value is null/empty.
+    """
+    # null / missing
+    if value is None:
+        return []
+    if isinstance(value, float) and pd.isna(value):
+        return []
+
+    # already a list (pyarrow / pandas parsed it)
+    if isinstance(value, (list, tuple)):
+        return [str(v).strip() for v in value if v is not None and str(v).strip() != ""]
+
+    # coerce to string
+    raw = str(value).strip()
+    if not raw or raw.lower() in {"nan", "none", "null", "[]"}:
+        return []
+
+    if fmt == "list":
+        try:
+            parsed = ast.literal_eval(raw)
+            if isinstance(parsed, (list, tuple)):
+                return [str(v).strip() for v in parsed if str(v).strip()]
+        except (ValueError, SyntaxError):
+            pass
+        return [raw]
+
+    if fmt == "json":
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return [str(v).strip() for v in parsed if str(v).strip()]
+            return [str(parsed).strip()]
+        except json.JSONDecodeError:
+            return [raw]
+
+    if fmt == "csv":
+        parts = [p.strip().strip("'\"") for p in raw.split(",") if p.strip()]
+        return parts if parts else [raw]
+
+    # fmt == 'auto'
+    # 1. JSON array (double-quoted)
+    if raw.startswith("[") or raw.startswith("{"):
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return [str(v).strip() for v in parsed if str(v).strip()]
+            return [str(parsed).strip()]
+        except json.JSONDecodeError:
+            pass
+
+        # 1b. Python list/dict repr with single quotes (raw parquet dump format)
+        try:
+            parsed = ast.literal_eval(raw)
+            if isinstance(parsed, (list, tuple)):
+                return [str(v).strip() for v in parsed if str(v).strip()]
+            if parsed is not None:
+                return [str(parsed).strip()]
+        except (ValueError, SyntaxError):
+            pass
+
+    # 2. Comma-separated
+    if "," in raw:
+        parts = [p.strip().strip("'\"[]") for p in raw.split(",") if p.strip()]
+        if len(parts) > 1:
+            return parts
+
+    # 3. Single scalar
+    return [raw.strip("'\"")]
+
+
+# ---------------------------------------------------------------------------
+# Bridge construction
+# ---------------------------------------------------------------------------
+
+
+def build_landlord_company_bridge(
+    landlords: pd.DataFrame,
+    fmt: str | None = None,
+) -> pd.DataFrame:
+    """
+    Explode AllCompanyID into a normalised (LandLordID, CompanyID) bridge.
+
+    Parameters
+    ----------
+    landlords : raw LandLords DataFrame with AllCompanyID column
+    fmt       : format hint for parse_all_company_id; None defaults to 'auto'
+
+    Returns
+    -------
+    pd.DataFrame with columns ['LandLordID', 'CompanyID'], deduplicated.
+    """
+    if "AllCompanyID" not in landlords.columns:
+        raise ValueError(
+            "LandLords DataFrame missing 'AllCompanyID' column — "
+            "cannot build the landlord-company bridge."
+        )
+
+    _fmt = fmt or "auto"
+    rows = []
+
+    for _, row in landlords.iterrows():
+        landlord_id = str(row["LandLordID"]).strip()
+        company_ids = parse_all_company_id(row["AllCompanyID"], fmt=_fmt)
+        for cid in company_ids:
+            rows.append({"LandLordID": landlord_id, "CompanyID": cid})
+
+    bridge = (
+        pd.DataFrame(rows, columns=["LandLordID", "CompanyID"])
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+
+    logger.info(
+        "Bridge: %d rows, %d unique landlords, %d unique companies",
+        len(bridge),
+        bridge["LandLordID"].nunique(),
+        bridge["CompanyID"].nunique(),
+    )
+    return bridge
+
+
+# ---------------------------------------------------------------------------
+# Model base — bridge LEFT JOIN companies
+# ---------------------------------------------------------------------------
+
+
+def build_model_base(
+    landlords: pd.DataFrame,
+    companies: pd.DataFrame,
+    fmt: str | None = None,
+) -> tuple:
+    """
+    Build bridge and model base (bridge + company features).
+
+    Returns
+    -------
+    (bridge, model_base)
+        bridge     : pd.DataFrame [(LandLordID, CompanyID)]
+        model_base : pd.DataFrame [(LandLordID, CompanyID, *company_cols)]
+                     LEFT JOIN — unmatched companies have NaN features.
+    """
+    bridge = build_landlord_company_bridge(landlords, fmt=fmt)
+
+    model_base = bridge.merge(
+        companies,
+        on="CompanyID",
+        how="left",
+        validate="many_to_one",
+    )
+
+    bridge_ids = set(bridge["CompanyID"].astype(str))
+    company_ids = set(companies["CompanyID"].astype(str))
+    n_unmatched = len(bridge_ids - company_ids)
+
+    if n_unmatched > 0:
+        pct = n_unmatched / len(bridge_ids)
+        logger.warning(
+            "%d unique CompanyIDs in bridge unmatched (%.1f%%) — NaN features",
+            n_unmatched,
+            pct * 100,
+        )
+
+    logger.info("Model base: %d rows, %d columns", len(model_base), model_base.shape[1])
+    return bridge, model_base
