@@ -1,0 +1,106 @@
+# ============================================================
+# Good Landlord Model — Central Configuration
+# All hyperparameters, paths, and seeds live here.
+# Never hardcode these in source files.
+# ============================================================
+
+# ----- Reproducibility -----
+seed: 42
+
+# ----- Paths -----
+paths:
+  raw_landlords:   data/raw/LandLords.parquet
+  raw_companies:   data/raw/Companies.parquet
+  processed_dir:   data/processed
+  artifacts_dir:   data/artifacts
+  reports_dir:     reports
+  figures_dir:     reports/figures
+
+# ----- Data -----
+data:
+  # AllCompanyID parsing: "list" | "comma_string" | "json_string"
+  # Set after inspecting raw data; used in ingestion.py
+  all_company_id_format: auto   # auto = try list → json → comma
+  min_tenants_for_scoring: 1    # landlords with fewer matched companies are excluded from labeled dataset
+
+# ----- Target construction -----
+target:
+  # Strategy: "status" | "composite" | "both"
+  strategy: both
+
+  # CompanyStatus → binary mapping (extend after data inspection)
+  status_positive: ["Active", "active", "Operating", "operating", "Open", "open"]
+  status_negative: ["Closed", "closed", "Failed", "failed", "Inactive", "inactive", "Bankrupt", "bankrupt"]
+  status_exclude:  []   # statuses to drop from binary training (ambiguous)
+
+  # Composite score weights (must sum to 1.0)
+  composite_weights:
+    sales_efficiency: 0.30
+    retention:        0.20
+    conversion:       0.20
+    momentum:         0.15
+    active_clients:   0.15
+
+  # Epsilon for safe division
+  epsilon: 1e-6
+
+# ----- Landlord scoring -----
+landlord_score:
+  # Empirical-Bayes shrinkage parameter m
+  # Shrunk score = N/(N+m) * raw_score + m/(N+m) * global_mean
+  shrinkage_m: 10
+  # Top/bottom band thresholds for QualityBand
+  top_percentile: 70    # >= 70th percentile → "good"
+  bottom_percentile: 30 # <= 30th percentile → "bad"
+  # Confidence thresholds (by tenant count)
+  confidence_high_threshold: 10
+  confidence_medium_threshold: 5
+
+# ----- Company baseline model -----
+company_baseline:
+  model_type: logistic_regression   # "logistic_regression" | "catboost"
+  cv_folds: 5
+  logistic_regression:
+    C: 0.1
+    max_iter: 1000
+    class_weight: balanced
+  catboost:
+    iterations: 500
+    depth: 4
+    learning_rate: 0.05
+    loss_function: Logloss
+    eval_metric: AUC
+    random_seed: 42
+    verbose: False
+    early_stopping_rounds: 50
+
+# ----- Landlord model (CatBoost regressor) -----
+landlord_model:
+  cv_folds: 5
+  catboost:
+    iterations: 1000
+    depth: 6
+    learning_rate: 0.03
+    loss_function: RMSE
+    eval_metric: MAE
+    l2_leaf_reg: 5
+    random_seed: 42
+    verbose: False
+    early_stopping_rounds: 100
+  # Features included in each model variant
+  feature_sets:
+    landlord_only: true   # always train landlord-only model (works for new landlords)
+    with_portfolio: true  # train enriched model with tenant-portfolio features when data allows
+
+# ----- Evaluation -----
+evaluation:
+  # Classification threshold (applied to regression score percentile)
+  classification_threshold: 0.5
+  # Lift analysis groups
+  lift_top_pct: 0.10
+  lift_bottom_pct: 0.10
+  # Segment columns to evaluate separately
+  segment_columns:
+    - PreferredIndustry
+    - OriginCity
+    - OriginCountry
