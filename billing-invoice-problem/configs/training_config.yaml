@@ -40,6 +40,8 @@ interval:
   one_time_horizon_days: 400
   # Gap coefficient-of-variation above this => 'irregular'.
   max_gap_cv: 0.5
+  # With >=2 competing base periods, dominant share below this => "mixed".
+  mixed_dominant_share_max: 0.8
 
 # --- Dollar-churn label ---
 churn:

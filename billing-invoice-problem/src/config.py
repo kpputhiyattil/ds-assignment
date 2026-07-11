@@ -60,6 +60,7 @@ class IntervalConfig(BaseModel):
     match_tolerance: float = Field(gt=0, lt=1)
     one_time_horizon_days: int = Field(gt=0)
     max_gap_cv: float = Field(gt=0)
+    mixed_dominant_share_max: float = Field(gt=0, le=1)
 
 
 class ChurnConfig(BaseModel):
