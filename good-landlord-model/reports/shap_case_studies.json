@@ -1,0 +1,247 @@
+[
+  {
+    "LandLordID": "LANDLORD_5976",
+    "band": "good",
+    "AdjustedScore": 0.5467117890004738,
+    "oof_pred": 0.44258272889832256,
+    "TenantCount": 23,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": 0.027518341801323204,
+        "feature_value": 10.862068965517242
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": 0.012734006692500233,
+        "feature_value": 0.3793103448275862
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": 0.007575296260903291,
+        "feature_value": 29.0
+      },
+      {
+        "feature": "PortfolioSize",
+        "shap_value": 0.00744205267128361,
+        "feature_value": 29
+      },
+      {
+        "feature": "PortfolioStdBudget",
+        "shap_value": 0.007304085655846797,
+        "feature_value": 13847.358786858958
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": -0.013430072620026831,
+        "feature_value": 0.7150223451422154
+      },
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": -0.00638114435136525,
+        "feature_value": 6229.12
+      }
+    ],
+    "waterfall_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\figures\\shap\\case_studies\\waterfall_good_LANDLORD_5976.png",
+    "narrative": "Landlord `LANDLORD_5976` is a **good** case with AdjustedScore=0.5467, model prediction 0.4426 (based on 23 matched tenants). The model associated higher score with: PortfolioMeanClients (+0.0275), PortfolioMeanSales (+0.0127), ActiveCompanies (+0.0076). Downward contributions came from: PortfolioMeanRetention (-0.0134), PortfolioMeanBudget (-0.0064). These are model associations, not proven causal effects."
+  },
+  {
+    "LandLordID": "LANDLORD_8695",
+    "band": "good",
+    "AdjustedScore": 0.5369464343681425,
+    "oof_pred": 0.44499511256648827,
+    "TenantCount": 25,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": 0.024634146100823418,
+        "feature_value": 16.307692307692307
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": 0.011528139611802766,
+        "feature_value": 0.2564102564102564
+      },
+      {
+        "feature": "PortfolioSize",
+        "shap_value": 0.009665679013772976,
+        "feature_value": 39
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": 0.009060625430712274,
+        "feature_value": 39.0
+      },
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": 0.004496748564757108,
+        "feature_value": 1.0
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": -0.013775441642419102,
+        "feature_value": 0.724205398179502
+      }
+    ],
+    "waterfall_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\figures\\shap\\case_studies\\waterfall_good_LANDLORD_8695.png",
+    "narrative": "Landlord `LANDLORD_8695` is a **good** case with AdjustedScore=0.5369, model prediction 0.4450 (based on 25 matched tenants). The model associated higher score with: PortfolioMeanClients (+0.0246), PortfolioMeanSales (+0.0115), PortfolioSize (+0.0097). Downward contributions came from: PortfolioMeanRetention (-0.0138). These are model associations, not proven causal effects."
+  },
+  {
+    "LandLordID": "LANDLORD_5634",
+    "band": "bad",
+    "AdjustedScore": 0.2483812997335113,
+    "oof_pred": 0.29702211376873466,
+    "TenantCount": 25,
+    "top_positive_drivers": [
+      {
+        "feature": "TotalPopulationAround",
+        "shap_value": 0.00031691872400386984,
+        "feature_value": 841693.1637
+      },
+      {
+        "feature": "LandlordAge",
+        "shap_value": 0.0002204677331576806,
+        "feature_value": 8.0
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": -0.0381873300806329,
+        "feature_value": 1813555.39177
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": -0.028186075735844463,
+        "feature_value": 20.037037037037038
+      },
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": -0.0218316912984716,
+        "feature_value": 173.4814814814815
+      },
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": -0.017075228663861963,
+        "feature_value": 0.96
+      },
+      {
+        "feature": "PortfolioStdBudget",
+        "shap_value": -0.015482703040796195,
+        "feature_value": 6212782.86696596
+      }
+    ],
+    "waterfall_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\figures\\shap\\case_studies\\waterfall_bad_LANDLORD_5634.png",
+    "narrative": "Landlord `LANDLORD_5634` is a **bad** case with AdjustedScore=0.2484, model prediction 0.2970 (based on 25 matched tenants). The model associated higher score with: TotalPopulationAround (+0.0003), LandlordAge (+0.0002). Downward contributions came from: PortfolioMeanBudget (-0.0382), PortfolioMeanSales (-0.0282), PortfolioMeanClients (-0.0218). These are model associations, not proven causal effects."
+  },
+  {
+    "LandLordID": "LANDLORD_10894",
+    "band": "bad",
+    "AdjustedScore": 0.2224006383969599,
+    "oof_pred": 0.354566597835225,
+    "TenantCount": 6,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanClients",
+        "shap_value": 0.01142256756763294,
+        "feature_value": 24.833333333333332
+      },
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": 0.0022273933907283796,
+        "feature_value": 0.22798316532586513
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": -0.12881037573404505,
+        "feature_value": 0.3333333333333333
+      },
+      {
+        "feature": "LandlordAge",
+        "shap_value": -0.018613504884558377,
+        "feature_value": 22.0
+      },
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": -0.018578453948930793,
+        "feature_value": 21.5
+      },
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": -0.007914328045060074,
+        "feature_value": 4420.527880000001
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": -0.0050654041495774285,
+        "feature_value": 11.0
+      }
+    ],
+    "waterfall_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\figures\\shap\\case_studies\\waterfall_bad_LANDLORD_10894.png",
+    "narrative": "Landlord `LANDLORD_10894` is a **bad** case with AdjustedScore=0.2224, model prediction 0.3546 (based on 6 matched tenants). The model associated higher score with: PortfolioMeanClients (+0.0114), PortfolioMeanRetention (+0.0022). Downward contributions came from: PortfolioActiveRate (-0.1288), LandlordAge (-0.0186), PortfolioMeanSales (-0.0186). These are model associations, not proven causal effects."
+  },
+  {
+    "LandLordID": "LANDLORD_3491",
+    "band": "neutral",
+    "AdjustedScore": 0.4381628279305444,
+    "oof_pred": 0.388286699867177,
+    "TenantCount": 5,
+    "top_positive_drivers": [
+      {
+        "feature": "PortfolioMeanSales",
+        "shap_value": 0.004877798619672856,
+        "feature_value": 1.8333333333333333
+      },
+      {
+        "feature": "PortfolioActiveRate",
+        "shap_value": 0.003944308586464169,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "PortfolioMeanBudget",
+        "shap_value": 0.00294233888445861,
+        "feature_value": 760.4
+      },
+      {
+        "feature": "PreferredIndustry",
+        "shap_value": 0.0011802214938628271,
+        "feature_value": "Consumer Durables"
+      },
+      {
+        "feature": "PortfolioMeanRetention",
+        "shap_value": 0.000777955594436843,
+        "feature_value": 0.41912240197025924
+      }
+    ],
+    "top_negative_drivers": [
+      {
+        "feature": "PortfolioMeanSuccessScore",
+        "shap_value": -0.002244210151293015,
+        "feature_value": 0.5816314247579405
+      },
+      {
+        "feature": "ActiveCompanies",
+        "shap_value": -0.0012364404365087073,
+        "feature_value": 6.0
+      },
+      {
+        "feature": "PortfolioSize",
+        "shap_value": -0.0006521587391963998,
+        "feature_value": 6
+      },
+      {
+        "feature": "TotalPopulationAround",
+        "shap_value": -6.944015895040271e-05,
+        "feature_value": 167379.2131
+      }
+    ],
+    "waterfall_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\figures\\shap\\case_studies\\waterfall_neutral_LANDLORD_3491.png",
+    "narrative": "Landlord `LANDLORD_3491` is a **neutral** case with AdjustedScore=0.4382, model prediction 0.3883 (based on 5 matched tenants). The model associated higher score with: PortfolioMeanSales (+0.0049), PortfolioActiveRate (+0.0039), PortfolioMeanBudget (+0.0029). Downward contributions came from: PortfolioMeanSuccessScore (-0.0022), ActiveCompanies (-0.0012), PortfolioSize (-0.0007). These are model associations, not proven causal effects."
+  }
+]

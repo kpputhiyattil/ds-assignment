@@ -84,6 +84,7 @@ python scripts/run_eda.py
 python scripts/run_company_targets.py
 python scripts/run_landlord_models.py
 python scripts/compare_landlord_models.py
+python scripts/run_shap_explainability.py
 
 # Fit OOF company baseline + compute adjusted landlord scores
 python -m src.models.company_baseline
@@ -93,7 +94,7 @@ python -m src.models.train
 
 # Evaluate + generate SHAP explainability outputs
 python -m src.models.evaluate
-python -m src.explainability.shap_utils
+python scripts/run_shap_explainability.py
 ```
 
 Or explore interactively via the numbered notebooks in `notebooks/`.
