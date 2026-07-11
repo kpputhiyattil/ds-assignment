@@ -131,6 +131,34 @@ def build_feature_matrix(
     return mat
 
 
+def build_scoring_features(
+    events: pl.LazyFrame | pl.DataFrame,
+    snapshot: dt.date,
+    cfg: Config | None = None,
+) -> pl.DataFrame:
+    """Serving-time features (no labels, no cohort filter).
+
+    Identical feature engineering to :func:`build_feature_matrix` but without the
+    outcome window -- used to score customers at integration time, when the
+    future is unknown. Returns one row per customer that has any pre-snapshot
+    history, with the inferred interval label attached for the guardrail.
+    """
+    cfg = cfg or get_config()
+    s = cfg.schema_
+    cust = s.customer_id_col
+    lf = events.lazy() if isinstance(events, pl.DataFrame) else events
+
+    core = _core_features(lf, snapshot, cfg)
+    iv = infer_intervals(lf, snapshot, cfg).rename({"days_since_last": "recency_days"})
+    iv = iv.with_columns(
+        [(pl.col(INTERVAL) == c).cast(pl.Int8).alias(f"is_{c}") for c in INTERVAL_CLASSES]
+    )
+    mat = iv.join(core, on=cust, how="left")
+    keep = [cust, INTERVAL, CONFIDENCE] + feature_columns()
+    keep = [c for c in keep if c in mat.columns]
+    return mat.select(keep)
+
+
 def feature_columns() -> list[str]:
     """All model feature columns (order stable)."""
     return CORE_FEATURES + GAP_FEATURES + INTERVAL_FEATURES
