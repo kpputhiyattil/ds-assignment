@@ -12,8 +12,8 @@ down the assessment pipeline.
 from __future__ import annotations
 
 import logging
-import os
-from typing import Optional
+
+from agent.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -22,21 +22,13 @@ def get_langfuse_handler():
     """
     Return a configured LangfuseCallbackHandler or None.
 
-    Requires all three env vars to be set:
-        LANGFUSE_SECRET_KEY
-        LANGFUSE_PUBLIC_KEY
-        LANGFUSE_HOST  (defaults to https://cloud.langfuse.com)
-
-    Returns None (without raising) if:
-    - Keys are missing / empty
-    - langfuse package is not installed
-    - Langfuse host is unreachable (deferred to first trace attempt)
+    Credentials are read from Settings (LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY,
+    LANGFUSE_HOST). Returns None silently if any are missing or the package is
+    not installed — tracing is optional, never a hard dependency.
     """
-    secret_key = os.getenv("LANGFUSE_SECRET_KEY", "").strip()
-    public_key = os.getenv("LANGFUSE_PUBLIC_KEY", "").strip()
-    host = os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com").strip()
+    settings = get_settings()
 
-    if not secret_key or not public_key:
+    if not settings.langfuse_enabled:
         logger.debug(
             "Langfuse keys not configured — tracing disabled. "
             "Set LANGFUSE_SECRET_KEY and LANGFUSE_PUBLIC_KEY to enable."
@@ -44,14 +36,17 @@ def get_langfuse_handler():
         return None
 
     try:
+        # Compatibility shim: langchain 0.2+ removed the `debug` module attribute
+        # but some Langfuse versions still try to read/write it.
+        import agent.compat  # noqa: F401 — ensure langchain attrs patched before langfuse loads
         from langfuse.callback import CallbackHandler  # type: ignore
 
         handler = CallbackHandler(
-            secret_key=secret_key,
-            public_key=public_key,
-            host=host,
+            secret_key=settings.langfuse_secret_key,
+            public_key=settings.langfuse_public_key,
+            host=settings.langfuse_host,
         )
-        logger.info("Langfuse tracing enabled → %s", host)
+        logger.info("Langfuse tracing enabled → %s", settings.langfuse_host)
         return handler
 
     except ImportError:

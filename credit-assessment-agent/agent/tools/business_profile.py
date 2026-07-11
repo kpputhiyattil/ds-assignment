@@ -99,6 +99,28 @@ BUSINESS_TYPE_RISK_MAP: dict[str, str] = {
     "fitness": "medium",
     "Beauty": "medium",
     "beauty": "medium",
+    # --- Dataset-specific PrimaryType values (Companies.parquet) ---
+    "Pets": "medium",
+    "Toys": "medium",
+    "Office": "low",
+    "Food": "low",
+    "Gardening": "low",
+    "Sport": "medium",
+    "Furniture": "medium",
+    "Electronics": "medium",
+    "Pharma": "medium",
+    "Banking": "medium",
+    "Alcohol": "high",
+    "Angel (individual)": "high",
+    "Angel Group": "high",
+    "Family Office": "medium",
+    "VC-Backed Company": "medium",
+    "Growth/Expansion": "medium",
+    "Limited Partner": "medium",
+    "Impact Investing": "medium",
+    "Holding Company": "medium",
+    "Lender/Debt Provider": "medium",
+    "Other": "medium",
     # --- High risk: highly volatile, regulatory exposure, or unproven models ---
     "Startup": "high",
     "startup": "high",
@@ -126,9 +148,10 @@ BUSINESS_TYPE_RISK_MAP: dict[str, str] = {
     "firearms": "high",
 }
 
-# Status normalisation — maps raw dataset values to canonical flags
+# Status normalisation — maps raw dataset values to canonical flags.
+# Includes both generic labels and the actual Companies.parquet values.
 STATUS_NORMALISATION: dict[str, str] = {
-    # Active variants
+    # Active variants (generic)
     "active": "active",
     "Active": "active",
     "ACTIVE": "active",
@@ -136,7 +159,11 @@ STATUS_NORMALISATION: dict[str, str] = {
     "Open": "active",
     "operating": "active",
     "Operating": "active",
-    # Inactive variants
+    # Active variants (dataset-specific)
+    "Actively Seeking New Employees": "active",
+    "Will Consider New Projects": "active",
+    "Acquired/Merged (Operating Subsidiary)": "active",
+    # Inactive variants (generic)
     "inactive": "inactive",
     "Inactive": "inactive",
     "INACTIVE": "inactive",
@@ -144,6 +171,10 @@ STATUS_NORMALISATION: dict[str, str] = {
     "Dormant": "inactive",
     "paused": "inactive",
     "Paused": "inactive",
+    # Inactive variants (dataset-specific)
+    "Not Making New Products": "inactive",
+    "Reducing Activity": "inactive",
+    "Acquired/Merged": "inactive",
     # Suspended variants
     "suspended": "suspended",
     "Suspended": "suspended",
@@ -151,7 +182,7 @@ STATUS_NORMALISATION: dict[str, str] = {
     "on hold": "suspended",
     "On Hold": "suspended",
     "frozen": "suspended",
-    # Closed variants
+    # Closed variants (generic)
     "closed": "closed",
     "Closed": "closed",
     "CLOSED": "closed",
@@ -163,6 +194,8 @@ STATUS_NORMALISATION: dict[str, str] = {
     "Bankrupt": "closed",
     "terminated": "closed",
     "Terminated": "closed",
+    # Closed variants (dataset-specific)
+    "Out of Business": "closed",
 }
 
 _CURRENT_YEAR = datetime.now().year
@@ -171,7 +204,7 @@ _CURRENT_YEAR = datetime.now().year
 def _normalise_status(raw: Optional[str]) -> tuple[str, list[str]]:
     """Map raw CompanyStatus to a canonical flag. Returns (flag, issues)."""
     issues: list[str] = []
-    if raw is None:
+    if raw is None or (isinstance(raw, str) and not raw.strip()):
         issues.append("missing: company_status")
         return "unknown", issues
 

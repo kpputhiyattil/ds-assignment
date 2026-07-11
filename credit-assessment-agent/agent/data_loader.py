@@ -10,15 +10,31 @@ Responsible for:
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 
+from agent.config import get_settings
+
 logger = logging.getLogger(__name__)
 
-# Expected columns — used for schema validation on load
+# Mapping from raw parquet column names → canonical names used by the agent tools.
+# If a column already has the canonical name it is left unchanged.
+_COLUMN_RENAME_MAP: dict[str, str] = {
+    "SalesOfMainProduct": "SalesMain",
+    "SalesOfOtherProduct": "SalesOther",
+    "Monthly budget": "MonthlyBudget",
+    "ReturningClient": "ReturningClients",
+    "ClientsInTheLast7Days": "Clients7D",
+    "ClientsInTheLast6Months": "Clients6M",
+    "ClientsInTheLast12Months": "Clients12M",
+    "TotalClientsInTheLast7Days": "Visitors7D",
+    "TotalClientsInTheLast6Months": "Visitors6M",
+    "TotalClientsInTheLast12Months": "Visitors12M",
+}
+
+# Expected columns (canonical names, after renaming) — used for schema validation
 REQUIRED_COLUMNS = {
     "CompanyID",
     "CompanyStatus",
@@ -41,8 +57,6 @@ REQUIRED_COLUMNS = {
     "Visitors12M",
 }
 
-DEFAULT_DATA_PATH = "./Companies.parquet"
-
 
 class DataLoaderError(Exception):
     """Raised when the parquet file cannot be loaded or is invalid."""
@@ -58,19 +72,23 @@ class DataLoader:
 
     Usage
     -----
-    loader = DataLoader()                        # uses DATA_PATH env var or default
-    loader = DataLoader("/path/to/data.parquet") # explicit path
+    loader = DataLoader()                        # uses DATA_PATH from Settings
+    loader = DataLoader("/path/to/data.parquet") # explicit path override
 
-    ids   = loader.list_company_ids()
-    row   = loader.get_company("COMP_001")       # returns dict
+    ids    = loader.list_company_ids()
+    row    = loader.get_company("COMP_001")      # returns dict
     sample = loader.get_sample_companies(n=3)    # list of dicts
     """
 
     def __init__(self, path: Optional[str] = None) -> None:
-        data_path = path or os.getenv("DATA_PATH", DEFAULT_DATA_PATH)
+        data_path = path or get_settings().data_path
         self._path = Path(data_path)
         self._df = self._load(self._path)
-        logger.info("DataLoader ready: %d companies loaded from %s", len(self._df), self._path)
+        logger.info(
+            "DataLoader ready: %d companies loaded from %s",
+            len(self._df),
+            self._path,
+        )
 
     # ------------------------------------------------------------------
     # Public interface
@@ -93,11 +111,10 @@ class DataLoader:
         if matches.empty:
             raise CompanyNotFoundError(
                 f"Company '{company_id}' not found. "
-                f"Use list_company_ids() to see available IDs."
+                "Use list_company_ids() to see available IDs."
             )
 
         row = matches.iloc[0].to_dict()
-        # Convert NaN → None for clean downstream handling
         return {k: (None if pd.isna(v) else v) for k, v in row.items()}
 
     def list_company_ids(self) -> list[str]:
@@ -114,15 +131,13 @@ class DataLoader:
         df = self._df
         statuses = df["CompanyStatus"].dropna().unique().tolist()
 
-        sample_rows: list[pd.Series] = []
+        sample_rows: list[pd.DataFrame] = []
         per_status = max(1, n // len(statuses)) if statuses else n
 
         for status in statuses:
             subset = df[df["CompanyStatus"] == status]
             take = min(per_status, len(subset))
             sample_rows.append(subset.sample(n=take, random_state=42))
-            if len(sample_rows) >= n:
-                break
 
         sample_df = pd.concat(sample_rows).head(n)
         return [
@@ -137,7 +152,7 @@ class DataLoader:
 
     @property
     def null_rates(self) -> dict[str, float]:
-        """Null rate per column — useful for data quality checks on startup."""
+        """Null rate (%) per column — useful for data quality checks on startup."""
         return (self._df.isnull().mean() * 100).round(2).to_dict()
 
     # ------------------------------------------------------------------
@@ -148,22 +163,31 @@ class DataLoader:
         if not path.exists():
             raise DataLoaderError(
                 f"Data file not found: {path}\n"
-                f"Set DATA_PATH env var or place Companies.parquet in the project root."
+                "Set DATA_PATH env var or place Companies.parquet in the project root."
             )
-
         try:
             df = pd.read_parquet(path)
         except Exception as exc:
-            raise DataLoaderError(f"Failed to read parquet file '{path}': {exc}") from exc
+            raise DataLoaderError(
+                f"Failed to read parquet file '{path}': {exc}"
+            ) from exc
 
+        df = self._rename_columns(df)
         self._validate_schema(df)
         return df
 
-    def _validate_schema(self, df: pd.DataFrame) -> None:
-        """Fail loudly if expected columns are missing."""
-        actual = set(df.columns)
-        missing = REQUIRED_COLUMNS - actual
+    @staticmethod
+    def _rename_columns(df: pd.DataFrame) -> pd.DataFrame:
+        """Rename raw parquet columns to canonical names used by agent tools."""
+        rename = {k: v for k, v in _COLUMN_RENAME_MAP.items() if k in df.columns}
+        if rename:
+            logger.info("Renaming columns: %s", rename)
+            df = df.rename(columns=rename)
+        return df
 
+    def _validate_schema(self, df: pd.DataFrame) -> None:
+        """Log a warning (not a hard failure) if expected columns are missing."""
+        missing = REQUIRED_COLUMNS - set(df.columns)
         if missing:
             logger.warning(
                 "Parquet schema mismatch — missing columns: %s. "

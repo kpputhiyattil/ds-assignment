@@ -199,7 +199,7 @@ class GuardrailEngine:
             rationale=combined_rationale,
             tool_outputs=verdict.tool_outputs,
             guardrail_fired=True,
-            guardrail_reason=guardrail.reason,
+            guardrail_reason=f"{guardrail.rule_name}: {guardrail.reason}",
             steps=verdict.steps,
             error=verdict.error,
         )
