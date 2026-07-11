@@ -1,0 +1,32 @@
+[project]
+name = "credit-assessment-agent"
+version = "0.1.0"
+description = "LLM-powered credit assessment agent for Liquidity"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-openai>=0.1.0",
+    "langgraph>=0.2.0",
+    "langfuse>=2.0.0",
+    "langchain-core>=0.2.0",
+    "streamlit>=1.35.0",
+    "pandas>=2.2.0",
+    "pyarrow>=16.0.0",
+    "tenacity>=8.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-mock>=3.14.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
