@@ -37,6 +37,7 @@ from src.explainability.shap_utils import (
     write_explainability_report,
 )
 from src.features.transforms import get_feature_cols
+from src.utils.reproducibility import repo_relpath, set_seed
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ def main(argv: list[str] | None = None) -> Path:
     parser.add_argument("--n-dependence", type=int, default=3, help="Top features for dependence plots")
     args = parser.parse_args(argv)
 
+    seed = set_seed(int(cfg.get("seed", 42)))
     model_type = _resolve_model_type(args.model)
     processed = Path(cfg["paths"]["processed_dir"])
     artifacts = Path(cfg["paths"]["artifacts_dir"])
@@ -115,7 +117,7 @@ def main(argv: list[str] | None = None) -> Path:
         X,
         model_type=model_type,
         max_samples=args.max_samples,
-        seed=int(cfg.get("seed", 42)),
+        seed=seed,
         force_index=force_index,
     )
 
@@ -161,6 +163,10 @@ def main(argv: list[str] | None = None) -> Path:
         case_rows,
         figures_dir=figures / "case_studies",
     )
+    for cs in studies:
+        if cs.get("waterfall_path"):
+            cs["waterfall_path"] = repo_relpath(cs["waterfall_path"])
+
     studies_path = reports / "shap_case_studies.json"
     with open(studies_path, "w", encoding="utf-8") as fp:
         json.dump(studies, fp, indent=2, default=str)

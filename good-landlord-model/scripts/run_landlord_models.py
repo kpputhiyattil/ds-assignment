@@ -41,6 +41,7 @@ from src.models.evaluate import (
 )
 from src.models.train import ALL_MODEL_TYPES, train_all
 from src.targets.construction import build_targets
+from src.utils.reproducibility import repo_relpath, set_seed
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +59,14 @@ def _attach_targets(model_base: pd.DataFrame, companies_scored: pd.DataFrame) ->
 
 
 def main() -> Path:
+    seed = set_seed(int(cfg.get("seed", 42)))
     processed = Path(cfg["paths"]["processed_dir"])
     artifacts = Path(cfg["paths"]["artifacts_dir"])
     reports = Path(cfg["paths"]["reports_dir"])
     processed.mkdir(parents=True, exist_ok=True)
     artifacts.mkdir(parents=True, exist_ok=True)
     reports.mkdir(parents=True, exist_ok=True)
+    logger.info("Reproducibility seed=%d", seed)
 
     # ── 1. Load + bridge ─────────────────────────────────────────────────────
     landlords = load_landlords()
@@ -123,6 +126,7 @@ def main() -> Path:
     comparison.to_csv(comparison_path, index=False)
 
     eval_payload: dict = {
+        "seed": seed,
         "feature_set": feature_set,
         "n_landlords": int(len(matrix)),
         "numeric_features": numeric_cols,
@@ -171,8 +175,8 @@ def main() -> Path:
             "std_metrics": cv_result.std_metrics,
             "oof_metrics": oof_metrics,
             "quality_bands": bands,
-            "model_path": str(model_path),
-            "importance_path": str(imp_path),
+            "model_path": repo_relpath(model_path),
+            "importance_path": repo_relpath(imp_path),
         }
 
         logger.info(

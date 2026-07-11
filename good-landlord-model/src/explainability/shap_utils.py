@@ -24,6 +24,13 @@ from typing import Any, Literal
 import numpy as np
 import pandas as pd
 
+from src.explainability.feature_glossary import (
+    driver_phrase,
+    enrich_drivers,
+    feature_label,
+    glossary_as_records,
+)
+
 logger = logging.getLogger(__name__)
 
 ModelType = Literal["catboost", "xgboost", "lightgbm", "random_forest"]
@@ -255,7 +262,9 @@ def local_top_drivers(
     """
     Return (positive_drivers, negative_drivers) for one row.
 
-    Each driver: {feature, shap_value, feature_value}
+    Each driver includes raw fields plus human-readable enrichment:
+      feature, shap_value, feature_value,
+      label, description, value_display, direction, explanation
     """
     values = np.asarray(explanation.values[row_pos], dtype=float)
     names = list(explanation.feature_names) if explanation.feature_names is not None else [
@@ -269,7 +278,7 @@ def local_top_drivers(
 
     pos = sorted([r for r in rows if r["shap_value"] > 0], key=lambda r: -r["shap_value"])[:top_k]
     neg = sorted([r for r in rows if r["shap_value"] < 0], key=lambda r: r["shap_value"])[:top_k]
-    return pos, neg
+    return enrich_drivers(pos), enrich_drivers(neg)
 
 
 def select_case_study_ids(
@@ -333,20 +342,25 @@ def _narrative(
     pos: list[dict],
     neg: list[dict],
 ) -> str:
-    pos_txt = ", ".join(f"{d['feature']} (+{d['shap_value']:.4f})" for d in pos[:3]) or "none"
-    neg_txt = ", ".join(f"{d['feature']} ({d['shap_value']:.4f})" for d in neg[:3]) or "none"
+    pos_txt = "; ".join(driver_phrase(d) for d in pos[:3]) or "no strong upward drivers"
+    neg_txt = "; ".join(driver_phrase(d) for d in neg[:3]) or "no strong downward drivers"
     conf = (
         f"based on {tenant_count} matched tenants"
         if tenant_count is not None
         else "tenant count unavailable"
     )
-    pred_txt = f", model prediction {pred:.4f}" if pred is not None and not np.isnan(pred) else ""
+    pred_txt = (
+        f", and the model predicted {pred:.4f}"
+        if pred is not None and not np.isnan(pred)
+        else ""
+    )
     return (
-        f"Landlord `{landlord_id}` is a **{band}** case with AdjustedScore={score:.4f}"
-        f"{pred_txt} ({conf}). "
-        f"The model associated higher score with: {pos_txt}. "
-        f"Downward contributions came from: {neg_txt}. "
-        f"These are model associations, not proven causal effects."
+        f"Landlord `{landlord_id}` is a **{band}** case with historical AdjustedScore "
+        f"{score:.4f}{pred_txt} ({conf}). "
+        f"What pushed the score up: {pos_txt}. "
+        f"What pulled the score down: {neg_txt}. "
+        f"These are model associations used to explain the prediction — "
+        f"not proof that the landlord caused those tenant outcomes."
     )
 
 
@@ -431,12 +445,16 @@ def build_case_studies(
 
 
 def mean_abs_shap_table(explanation: Any, top_n: int = 20) -> pd.DataFrame:
-    """Return DataFrame of mean |SHAP| by feature."""
+    """Return DataFrame of mean |SHAP| by feature with human labels."""
     values = np.abs(np.asarray(explanation.values, dtype=float)).mean(axis=0)
     names = list(explanation.feature_names) if explanation.feature_names is not None else [
         f"f{i}" for i in range(len(values))
     ]
-    df = pd.DataFrame({"feature": names, "mean_abs_shap": values})
+    df = pd.DataFrame({
+        "feature": names,
+        "label": [feature_label(n) for n in names],
+        "mean_abs_shap": values,
+    })
     return df.sort_values("mean_abs_shap", ascending=False).head(top_n).reset_index(drop=True)
 
 
@@ -474,18 +492,36 @@ def write_explainability_report(
     lines.append(f"- SHAP sample size: **{n_shap_rows}**")
     lines.append("")
     lines.append(
-        "> SHAP explains how the model produced its prediction. "
+        "> SHAP explains how the model produced its prediction in plain language. "
         "It does **not** prove that a feature caused company or landlord success."
     )
+    lines.append("")
+
+    lines.append("## Feature glossary")
+    lines.append("")
+    lines.append(
+        "Technical column names are mapped to human-readable meanings below "
+        "(also applied in case-study narratives)."
+    )
+    lines.append("")
+    lines.append("| Column | Meaning | What it measures |")
+    lines.append("| --- | --- | --- |")
+    for row in glossary_as_records():
+        lines.append(
+            f"| `{row['feature']}` | {row['label']} | {row['description']} |"
+        )
     lines.append("")
 
     lines.append("## Global feature importance (mean |SHAP|)")
     lines.append("")
     if not global_importance.empty:
-        lines.append("| Feature | mean |SHAP| |")
-        lines.append("| --- | ---: |")
+        lines.append("| Meaning | Column | mean |SHAP| |")
+        lines.append("| --- | --- | ---: |")
         for _, row in global_importance.iterrows():
-            lines.append(f"| `{row['feature']}` | {row['mean_abs_shap']:.5f} |")
+            label = row["label"] if "label" in row.index else feature_label(str(row["feature"]))
+            lines.append(
+                f"| {label} | `{row['feature']}` | {row['mean_abs_shap']:.5f} |"
+            )
         lines.append("")
     else:
         lines.append("_No importance rows._")
@@ -508,7 +544,9 @@ def write_explainability_report(
         lines.append("")
         for k in deps:
             feat = k.replace("dependence_", "")
-            lines.append(f"### {feat}")
+            lines.append(f"### {feature_label(feat)}")
+            lines.append("")
+            lines.append(f"_Column: `{feat}`_")
             lines.append("")
             lines.append(f"![{feat}]({_rel_for_md(figure_paths[k], report_dir)})")
             lines.append("")
@@ -527,23 +565,29 @@ def write_explainability_report(
         lines.append(cs["narrative"])
         lines.append("")
         if cs.get("top_positive_drivers"):
-            lines.append("**Top positive drivers**")
+            lines.append("**What raised the score**")
             lines.append("")
-            lines.append("| Feature | SHAP | Value |")
-            lines.append("| --- | ---: | --- |")
+            lines.append("| Meaning | Value | Effect (SHAP) | Explanation |")
+            lines.append("| --- | --- | ---: | --- |")
             for d in cs["top_positive_drivers"]:
+                label = d.get("label") or feature_label(d["feature"])
+                val = d.get("value_display") or _fmt_val(d.get("feature_value"))
+                expl = d.get("explanation") or driver_phrase(d)
                 lines.append(
-                    f"| `{d['feature']}` | {d['shap_value']:.4f} | {_fmt_val(d['feature_value'])} |"
+                    f"| {label} | {val} | +{d['shap_value']:.4f} | {expl} |"
                 )
             lines.append("")
         if cs.get("top_negative_drivers"):
-            lines.append("**Top negative drivers**")
+            lines.append("**What lowered the score**")
             lines.append("")
-            lines.append("| Feature | SHAP | Value |")
-            lines.append("| --- | ---: | --- |")
+            lines.append("| Meaning | Value | Effect (SHAP) | Explanation |")
+            lines.append("| --- | --- | ---: | --- |")
             for d in cs["top_negative_drivers"]:
+                label = d.get("label") or feature_label(d["feature"])
+                val = d.get("value_display") or _fmt_val(d.get("feature_value"))
+                expl = d.get("explanation") or driver_phrase(d)
                 lines.append(
-                    f"| `{d['feature']}` | {d['shap_value']:.4f} | {_fmt_val(d['feature_value'])} |"
+                    f"| {label} | {val} | {d['shap_value']:.4f} | {expl} |"
                 )
             lines.append("")
         if cs.get("waterfall_path"):

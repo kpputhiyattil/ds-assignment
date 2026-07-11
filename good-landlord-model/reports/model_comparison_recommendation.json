@@ -74,6 +74,7 @@
       "n_landlords": 14838
     }
   ],
-  "report_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\model_comparison_report.md",
-  "csv_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\landlord_model_comparison.csv"
+  "report_path": "reports/model_comparison_report.md",
+  "csv_path": "reports/landlord_model_comparison.csv",
+  "seed": 42
 }

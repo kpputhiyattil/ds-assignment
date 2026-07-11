@@ -1,20 +1,20 @@
-feature,mean_abs_shap
-PortfolioMeanClients,0.013097133545746181
-PortfolioMeanBudget,0.007978566000218545
-PortfolioActiveRate,0.007285208668446765
-PortfolioMeanSales,0.006220943995823159
-PortfolioMeanRetention,0.006052756742364131
-PortfolioMeanSuccessScore,0.0038453996748125867
-PortfolioSize,0.0019975650089807573
-ActiveCompanies,0.0019633455376615906
-PortfolioStdBudget,0.0012694348194510236
-PortfolioStdSuccessScore,0.001162699847354827
-OriginCountry,0.000671783391760308
-OriginCity,0.0006496639628572324
-LandlordAge,0.000597521548772576
-PreferredIndustry,0.0005841363960981637
-AreaPerCompany,0.0002216337856923672
-PopulationPerCompany,0.00019812240795213094
-Area,0.00010980972291084049
-TotalPopulationAround,9.846216812322607e-05
-PopulationDensity,6.567103276502117e-05
+feature,label,mean_abs_shap
+PortfolioMeanClients,Average tenant client base,0.013199063295471011
+PortfolioMeanBudget,Average tenant monthly budget,0.008028600848485308
+PortfolioActiveRate,Share of active tenants,0.00745064726405518
+PortfolioMeanSales,Average tenant sales intensity,0.006214900543422332
+PortfolioMeanRetention,Average tenant client retention,0.0060636635435288916
+PortfolioMeanSuccessScore,Average tenant success score,0.003812899771663151
+PortfolioSize,Matched tenant count,0.002009553708649523
+ActiveCompanies,Reported active companies,0.0019619276207849716
+PortfolioStdBudget,Budget variation across tenants,0.0012905003591724658
+PortfolioStdSuccessScore,Success-score variation across tenants,0.0011855828202420157
+OriginCountry,Origin country,0.0006694018957243964
+OriginCity,Origin city,0.0006547708543091787
+LandlordAge,Landlord age (years),0.0006076759725429201
+PreferredIndustry,Preferred industry,0.0005810433175163208
+AreaPerCompany,Area per company,0.00022738678367276922
+PopulationPerCompany,Population per company,0.00020386385574049153
+Area,Property / campus area,0.00011097942073584995
+TotalPopulationAround,Nearby population,9.831536011977799e-05
+PopulationDensity,Population density,6.568354118872177e-05

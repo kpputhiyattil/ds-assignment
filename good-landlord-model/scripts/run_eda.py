@@ -15,11 +15,14 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+from src.config import cfg
 from src.data.eda import write_eda_report
+from src.utils.reproducibility import set_seed
 
 
 def main(*, save_plots: bool = True) -> tuple[Path, Path]:
     """Load raw data, run EDA, write versioned report under reports/eda_runs/."""
+    set_seed(int(cfg.get("seed", 42)))
     json_path, md_path = write_eda_report(save_plots=save_plots)
 
     with open(json_path, encoding="utf-8") as fp:

@@ -53,8 +53,8 @@
         "n_pred_top": 4452,
         "n_pred_bottom": 4452
       },
-      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_catboost.joblib",
-      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_catboost.csv"
+      "model_path": "data/artifacts/landlord_model_catboost.joblib",
+      "importance_path": "reports/feature_importance_catboost.csv"
     },
     "xgboost": {
       "mean_metrics": {
@@ -84,8 +84,8 @@
         "n_pred_top": 4452,
         "n_pred_bottom": 4452
       },
-      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_xgboost.joblib",
-      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_xgboost.csv"
+      "model_path": "data/artifacts/landlord_model_xgboost.joblib",
+      "importance_path": "reports/feature_importance_xgboost.csv"
     },
     "lightgbm": {
       "mean_metrics": {
@@ -115,8 +115,8 @@
         "n_pred_top": 4452,
         "n_pred_bottom": 4452
       },
-      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_lightgbm.joblib",
-      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_lightgbm.csv"
+      "model_path": "data/artifacts/landlord_model_lightgbm.joblib",
+      "importance_path": "reports/feature_importance_lightgbm.csv"
     },
     "random_forest": {
       "mean_metrics": {
@@ -146,8 +146,8 @@
         "n_pred_top": 4452,
         "n_pred_bottom": 4452
       },
-      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_random_forest.joblib",
-      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_random_forest.csv"
+      "model_path": "data/artifacts/landlord_model_random_forest.joblib",
+      "importance_path": "reports/feature_importance_random_forest.csv"
     }
   }
 }

@@ -5,7 +5,8 @@ A production-grade ML pipeline that estimates whether a landlord is associated w
 1. **Estimates each company's expected performance** given its own characteristics (industry, age, budget, etc.)
 2. **Computes residuals** (actual minus expected) to isolate the landlord-specific contribution
 3. **Aggregates residuals per landlord** with shrinkage for small tenant counts
-4. **Trains a CatBoost regression model** to predict the adjusted landlord quality score from landlord features alone — enabling scoring of new landlords
+4. **Trains landlord regression models** (CatBoost recommended) to predict the adjusted quality score — enabling scoring of new landlords
+5. **Explains predictions** with SHAP global and case-study outputs
 
 ---
 
@@ -15,38 +16,37 @@ A production-grade ML pipeline that estimates whether a landlord is associated w
 good-landlord-model/
 ├── configs/
 │   └── training_config.yaml       # all hyperparams, paths, seeds
+├── scripts/                       # pipeline entrypoints
+│   ├── run_eda.py
+│   ├── run_company_targets.py
+│   ├── run_landlord_models.py
+│   ├── compare_landlord_models.py
+│   ├── run_shap_explainability.py
+│   ├── export_landlord_scorer.py
+│   └── write_mini_report.py
+├── service/                       # FastAPI + UI scoring desk
+│   ├── app/main.py
+│   ├── templates/
+│   ├── static/
+│   └── README.md
 ├── src/
-│   ├── data/
-│   │   ├── ingestion.py           # load raw parquets, build bridge table
-│   │   └── validation.py          # schema + data-quality checks
-│   ├── features/
-│   │   └── transforms.py          # shared train/serve feature transforms
-│   ├── targets/
-│   │   └── construction.py        # company success target design
-│   ├── models/
-│   │   ├── company_baseline.py    # OOF company model + residuals
-│   │   ├── train.py               # landlord-level CatBoost training
-│   │   └── evaluate.py            # metrics, lift, segment analysis
-│   └── explainability/
-│       └── shap_utils.py          # global + local SHAP outputs
-├── notebooks/
-│   ├── 01_data_audit_eda.ipynb
-│   ├── 02_target_construction.ipynb
-│   ├── 03_company_baseline_model.ipynb
-│   ├── 04_landlord_modeling.ipynb
-│   └── 05_explainability_report.ipynb
+│   ├── config.py
+│   ├── utils/reproducibility.py   # set_seed, repo_relpath
+│   ├── data/                      # ingestion, validation, eda
+│   ├── features/transforms.py
+│   ├── targets/construction.py
+│   ├── models/                    # baseline, train, evaluate, scorer
+│   └── explainability/shap_utils.py
 ├── data/
-│   ├── raw/          # place LandLords.parquet and Companies.parquet here (gitignored)
+│   ├── raw/          # LandLords.parquet, Companies.parquet (gitignored)
 │   ├── processed/    # intermediate outputs (gitignored)
-│   └── artifacts/    # saved model artifacts (gitignored)
+│   └── artifacts/    # saved models (gitignored)
 ├── reports/
-│   ├── figures/      # SHAP plots and evaluation charts
-│   └── mini_report.md
+│   ├── figures/
+│   ├── mini_report.md
+│   ├── model_comparison_report.md
+│   └── shap_explainability_report.md
 ├── tests/
-│   ├── test_ingestion.py
-│   ├── test_validation.py
-│   ├── test_features.py
-│   └── test_targets.py
 ├── Dockerfile
 ├── requirements.txt
 └── pyproject.toml
@@ -73,31 +73,26 @@ data/raw/Companies.parquet
 
 ### 3. Run the full pipeline
 
-Each step below corresponds to one git commit. Run them in order:
-
 ```bash
-# Validate raw data and inspect quality report
+# Validate raw data
 python -m src.data.validation
 
-# Pipeline runners (scripts/ = entrypoints; src/ = reusable library code)
+# Pipeline runners (scripts/ = entrypoints; src/ = library)
 python scripts/run_eda.py
 python scripts/run_company_targets.py
 python scripts/run_landlord_models.py
 python scripts/compare_landlord_models.py
 python scripts/run_shap_explainability.py
+python scripts/export_landlord_scorer.py
+python scripts/write_mini_report.py
 
-# Fit OOF company baseline + compute adjusted landlord scores
-python -m src.models.company_baseline
-
-# Train landlord CatBoost model
-python -m src.models.train
-
-# Evaluate + generate SHAP explainability outputs
-python -m src.models.evaluate
-python scripts/run_shap_explainability.py
+# Optional: scoring UI (FastAPI)
+pip install -r service/requirements.txt
+uvicorn service.app.main:app --reload --port 8080
+# open http://127.0.0.1:8080
 ```
 
-Or explore interactively via the numbered notebooks in `notebooks/`.
+All runners call `set_seed(cfg["seed"])` (default **42**) so NumPy / Python RNGs align with `configs/training_config.yaml`.
 
 ### 4. Run tests
 
@@ -111,11 +106,30 @@ pytest tests/ -v
 
 | Stage | What it does |
 |-------|-------------|
-| Target construction | Maps `CompanyStatus` to binary success; falls back to a composite score (sales efficiency, retention, conversion, momentum) normalized within industry |
-| Company baseline | Logistic Regression trained on company-only features; generates OOF predicted probabilities to avoid data leakage |
-| Adjusted landlord score | `residual = actual − expected`; aggregate per landlord with Empirical-Bayes shrinkage `N / (N + m)` toward global mean |
-| Landlord model | CatBoostRegressor on landlord features (age, density, area-per-company, population-per-company, industry alignment); GroupKFold by `LandLordID` |
-| Output | `PredictedQualityScore` (0–100), `PercentileRank`, `QualityBand`, `TenantCount`, `ConfidenceLevel`, SHAP drivers |
+| Target construction | Maps `CompanyStatus` to binary success; composite score normalized within industry |
+| Company baseline | Logistic Regression on company-only features; OOF probs (GroupKFold by landlord) |
+| Adjusted landlord score | Residual aggregation + Empirical-Bayes shrinkage `N / (N + m)` |
+| Landlord model | CatBoost / XGBoost / LightGBM / RF; GroupKFold by `LandLordID` |
+| Explainability | TreeSHAP global importance, dependence plots, good/bad/neutral case studies |
+| Serveable artifact | `LandlordScorer` packs **model + preprocessing + feature engineering + SHAP** |
+| Output | Adjusted / predicted scores, bands, SHAP drivers, mini report |
+
+### Serving the combined artifact
+
+```python
+from src.models.scorer import LandlordScorer
+
+scorer = LandlordScorer.load("data/artifacts/landlord_scorer.joblib")
+print(scorer.package_manifest())  # model / preprocessing / FE / shap
+
+# End-to-end: feature engineering -> preprocess -> predict -> SHAP
+rows, pipeline_info = scorer.score_end_to_end(upload_df, top_k=5)
+
+# Or score a ready feature matrix directly
+result = scorer.score_with_explanation(landlord_feature_rows, top_k=5)
+# each row: PredictedScore, QualityBand, ConfidenceLevel,
+#           TopPositiveDrivers, TopNegativeDrivers, ModelVersion
+```
 
 ### Key leakage controls
 
@@ -125,37 +139,51 @@ pytest tests/ -v
 
 ---
 
+## Reproducibility
+
+| Knob | Location |
+|------|----------|
+| Global seed | `configs/training_config.yaml` → `seed: 42` |
+| Model RNGs | `landlord_model.*.random_seed` / `random_state` |
+| Runtime seeding | `src.utils.reproducibility.set_seed` (called by every `scripts/` runner) |
+| Paths in JSON | Stored relative to repo root via `repo_relpath` |
+
+Docker:
+
+```bash
+docker build -t good-landlord-model .
+docker run --rm good-landlord-model pytest tests/ -q
+```
+
+---
+
 ## Final Output Schema
 
 | Field | Description |
 |-------|-------------|
 | `LandLordID` | Unique landlord identifier |
-| `PredictedQualityScore` | Model output rescaled 0–100 |
-| `PercentileRank` | Position among all scored landlords |
+| `PredictedQualityScore` / `AdjustedScore` | Model / EB-shrunk quality signal |
+| `PercentileRank` | Position among scored landlords |
 | `QualityBand` | `good` / `neutral` / `bad` |
-| `ProbabilityGood` | Calibrated probability (classification head) |
-| `TenantCount` | Matched tenant companies used in historical evaluation |
-| `ConfidenceLevel` | `high` / `medium` / `low` based on sample size |
-| `TopPositiveDrivers` | Top SHAP features increasing score |
-| `TopNegativeDrivers` | Top SHAP features decreasing score |
-| `ModelVersion` | Git commit + timestamp |
+| `TenantCount` | Matched tenant companies |
+| `ConfidenceLevel` | `high` / `medium` / `low` by sample size |
+| `TopPositiveDrivers` / `TopNegativeDrivers` | Local SHAP features |
+| `ModelVersion` | Best model type + config seed |
 
 ---
 
 ## Limitations
 
-- Model estimates **association**, not causation — landlord quality is confounded by tenant selection, location economics, and unobserved rental terms
+- Model estimates **association**, not causation
 - Survivorship bias: failed companies may be absent from `AllCompanyID`
-- Single snapshot data; no pre/post tenancy comparison is possible
-- Landlords with fewer than ~5 tenants receive high shrinkage; treat their scores with caution
+- Single snapshot; no pre/post tenancy comparison
+- Landlords with fewer than ~5 tenants receive high shrinkage
 
 ---
 
-## Assumptions to Confirm Before Running
+## Assumptions Confirmed on This Dataset
 
-1. What exact values appear in `CompanyStatus`?
-2. Is `AllCompanyID` a Python list, comma-separated string, or other format?
-3. Can a company appear under multiple landlords?
-4. Are there multiple historical snapshots per entity, or one row per ID?
-5. Does higher `Rank` mean better or worse customer feedback?
-6. Are `origin` fields permitted for modeling or for analysis/fairness-audit only?
+1. `CompanyStatus` values mapped in `training_config.yaml` (`status_positive` / `status_negative` / `status_exclude`)
+2. `AllCompanyID` stored as Python list reprs — handled by `ast.literal_eval` in auto mode
+3. Bridge↔Companies match rate ~70%; unmatched high IDs are a data gap
+4. Higher composite / residual scores treated as better landlord-associated outcomes

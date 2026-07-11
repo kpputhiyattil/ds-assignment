@@ -20,10 +20,12 @@ if str(_ROOT) not in sys.path:
 from src.config import cfg
 from src.data.ingestion import load_companies
 from src.targets.construction import build_targets, sensitivity_analysis
+from src.utils.reproducibility import repo_relpath, set_seed
 
 
 def main() -> Path:
     """Load Companies.parquet, build targets, write processed artifacts."""
+    set_seed(int(cfg.get("seed", 42)))
     companies = load_companies()
     scored = build_targets(companies, cfg=cfg)
     sens = sensitivity_analysis(scored)
@@ -48,7 +50,8 @@ def main() -> Path:
             "n_nan": int(scored["SuccessScore"].isna().sum()),
         },
         "sensitivity_spearman_min": float(off_diag.min()) if len(off_diag) else 1.0,
-        "output_path": str(out_path),
+        "output_path": repo_relpath(out_path),
+        "seed": int(cfg.get("seed", 42)),
     }
     summary_path = out_dir / "company_targets_summary.json"
     with open(summary_path, "w", encoding="utf-8") as fp:

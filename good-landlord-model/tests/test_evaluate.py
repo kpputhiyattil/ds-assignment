@@ -16,6 +16,8 @@ from src.models.evaluate import (
     quality_band_metrics,
     compare_models,
     oof_residual_summary,
+    suggest_best_model,
+    render_model_comparison_report,
 )
 from src.models.train import CVResult, FoldResult
 
@@ -346,3 +348,121 @@ class TestOofResidualSummary:
         result = _make_cvresult()
         df = oof_residual_summary(result)
         assert (df["abs_error"] >= 0).all()
+
+
+# ---------------------------------------------------------------------------
+# suggest_best_model / render_model_comparison_report
+# ---------------------------------------------------------------------------
+
+def _comparison_table() -> pd.DataFrame:
+    return pd.DataFrame([
+        {
+            "model_type": "catboost",
+            "mae_mean": 0.0119,
+            "mae_std": 0.0002,
+            "rmse_mean": 0.0162,
+            "rmse_std": 0.0004,
+            "r2_mean": 0.78,
+            "r2_std": 0.003,
+            "spearman_mean": 0.871,
+            "spearman_std": 0.005,
+            "n_folds": 5,
+            "n_landlords": 100,
+        },
+        {
+            "model_type": "xgboost",
+            "mae_mean": 0.0120,
+            "mae_std": 0.0002,
+            "rmse_mean": 0.0160,
+            "rmse_std": 0.0004,
+            "r2_mean": 0.782,
+            "r2_std": 0.004,
+            "spearman_mean": 0.870,
+            "spearman_std": 0.004,
+            "n_folds": 5,
+            "n_landlords": 100,
+        },
+        {
+            "model_type": "random_forest",
+            "mae_mean": 0.0150,
+            "mae_std": 0.0003,
+            "rmse_mean": 0.0190,
+            "rmse_std": 0.0005,
+            "r2_mean": 0.70,
+            "r2_std": 0.01,
+            "spearman_mean": 0.80,
+            "spearman_std": 0.01,
+            "n_folds": 5,
+            "n_landlords": 100,
+        },
+    ])
+
+
+class TestSuggestBestModel:
+
+    def test_empty_comparison(self):
+        out = suggest_best_model(pd.DataFrame())
+        assert out["best_model"] is None
+
+    def test_picks_lowest_mae(self):
+        out = suggest_best_model(_comparison_table())
+        assert out["best_model"] == "catboost"
+
+    def test_winners_by_metric(self):
+        out = suggest_best_model(_comparison_table())
+        assert out["winners_by_metric"]["mae_mean"] == "catboost"
+        assert out["winners_by_metric"]["rmse_mean"] == "xgboost"
+        assert out["winners_by_metric"]["r2_mean"] == "xgboost"
+
+    def test_near_tie_noted(self):
+        out = suggest_best_model(_comparison_table())
+        assert "Near-tie" in out["reason"]
+
+    def test_spearman_tiebreak(self):
+        df = pd.DataFrame([
+            {
+                "model_type": "a",
+                "mae_mean": 0.01,
+                "mae_std": 0.0,
+                "rmse_mean": 0.02,
+                "rmse_std": 0.0,
+                "r2_mean": 0.5,
+                "r2_std": 0.0,
+                "spearman_mean": 0.80,
+                "spearman_std": 0.0,
+                "n_folds": 3,
+                "n_landlords": 10,
+            },
+            {
+                "model_type": "b",
+                "mae_mean": 0.01,
+                "mae_std": 0.0,
+                "rmse_mean": 0.02,
+                "rmse_std": 0.0,
+                "r2_mean": 0.5,
+                "r2_std": 0.0,
+                "spearman_mean": 0.90,
+                "spearman_std": 0.0,
+                "n_folds": 3,
+                "n_landlords": 10,
+            },
+        ])
+        out = suggest_best_model(df)
+        assert out["best_model"] == "b"
+
+
+class TestRenderModelComparisonReport:
+
+    def test_contains_recommendation(self):
+        comparison = _comparison_table()
+        suggestion = suggest_best_model(comparison)
+        md = render_model_comparison_report(
+            comparison,
+            suggestion,
+            n_landlords=100,
+            n_folds=5,
+            feature_set="with_portfolio",
+        )
+        assert "# Landlord Model Comparison Report" in md
+        assert "catboost" in md
+        assert "Recommendation" in md

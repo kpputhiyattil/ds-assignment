@@ -39,6 +39,7 @@ from src.models.evaluate import (
 )
 from src.models.train import ALL_MODEL_TYPES, train_all
 from src.targets.construction import build_targets
+from src.utils.reproducibility import repo_relpath, set_seed
 
 logger = logging.getLogger(__name__)
 
@@ -107,8 +108,10 @@ def main(argv: list[str] | None = None) -> Path:
     )
     args = parser.parse_args(argv)
 
+    seed = set_seed(int(cfg.get("seed", 42)))
     reports = Path(cfg["paths"]["reports_dir"])
     reports.mkdir(parents=True, exist_ok=True)
+    logger.info("Reproducibility seed=%d", seed)
 
     matrix, feature_set = _load_or_build_matrix(rebuild=args.rebuild)
     numeric_cols, categorical_cols = get_feature_cols(matrix, feature_set=feature_set)
@@ -139,9 +142,10 @@ def main(argv: list[str] | None = None) -> Path:
         n_folds=n_folds,
         feature_set=feature_set,
         extra_notes=[
-            f"Comparison CSV: `{csv_path.as_posix()}`",
+            f"Comparison CSV: `{repo_relpath(csv_path)}`",
             "Primary selection rule: lowest GroupKFold MAE, then highest Spearman.",
             "CatBoost uses native categoricals; other models use ordinal-encoded categories.",
+            f"Config seed: {seed}.",
         ],
     )
     report_path = reports / "model_comparison_report.md"
@@ -154,8 +158,9 @@ def main(argv: list[str] | None = None) -> Path:
         "winners_by_metric": suggestion["winners_by_metric"],
         "best_row": suggestion.get("best_row"),
         "comparison": comparison.to_dict(orient="records"),
-        "report_path": str(report_path),
-        "csv_path": str(csv_path),
+        "seed": seed,
+        "report_path": repo_relpath(report_path),
+        "csv_path": repo_relpath(csv_path),
     }
     with open(rec_path, "w", encoding="utf-8") as fp:
         json.dump(rec_payload, fp, indent=2, default=str)

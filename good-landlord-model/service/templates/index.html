@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Landlord Quality Desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">LQ</span>
+      <div>
+        <p class="brand-name">Landlord Quality Desk</p>
+        <p class="brand-sub">Predict · Explain · Compare</p>
+      </div>
+    </div>
+    <div class="status-chip {% if ready %}is-ready{% else %}is-down{% endif %}">
+      {% if ready %}
+        {{ meta.model_type | default("model") }} · {{ meta.version | default("—") }}
+        {% if package_components %}
+          · {{ package_components | join(" + ") }}
+        {% endif %}
+      {% else %}
+        Scorer unavailable
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero compact">
+      <h1>Score landlords with explainable predictions</h1>
+      <p class="lede">Upload a file or enter one landlord — browse a compact table, then open any row for SHAP details.</p>
+    </section>
+
+    {% if not ready %}
+    <div class="banner warn">
+      Model artifact missing. Run
+      <code>python scripts/export_landlord_scorer.py</code>
+      then restart.
+      {% if error %}<br /><small>{{ error }}</small>{% endif %}
+    </div>
+    {% endif %}
+
+    <details class="input-drawer" open>
+      <summary>
+        <span>Input</span>
+        <span class="muted">Upload CSV/Parquet or enter details</span>
+      </summary>
+      <div class="input-body">
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab is-active" data-tab="upload" role="tab">Upload file</button>
+          <button type="button" class="tab" data-tab="form" role="tab">Enter details</button>
+        </div>
+
+        <div id="pane-upload" class="tab-pane is-active">
+          <form id="upload-form" class="stack">
+            <label class="dropzone" id="dropzone">
+              <input type="file" id="file-input" accept=".csv,.parquet,.pq" hidden />
+              <strong>Drop CSV or Parquet here</strong>
+              <span>Raw LandLords rows (preferred) · or LandLordID list · or feature matrix</span>
+              <em id="file-name">No file selected</em>
+            </label>
+            <p class="hint">
+              Uploads are routed through the <strong>same feature engineering</strong> as training
+              (<code>build_model_base</code> → company targets → <code>landlord_features</code> →
+              <code>portfolio_features</code>), using project Companies data for portfolio stats.
+              Already-built feature matrices are scored directly.
+            </p>
+            <div class="row-controls">
+              <label>
+                Top SHAP drivers
+                <input type="number" id="upload-top-k" min="1" max="15" value="{{ default_top_k }}" />
+              </label>
+              <button type="submit" class="btn primary" {% if not ready %}disabled{% endif %}>Score file</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="pane-form" class="tab-pane">
+          <form id="manual-form" class="stack">
+            <div class="field-grid">
+              <label>LandLordID
+                <input name="LandLordID" placeholder="LANDLORD_0001" />
+              </label>
+              <label>TenantCount
+                <input name="TenantCount" type="number" step="1" placeholder="10" />
+              </label>
+              {% for col in numeric_cols %}
+              <label>{{ col }}
+                <input name="{{ col }}" type="number" step="any" />
+              </label>
+              {% endfor %}
+              {% for col in categorical_cols %}
+              <label>{{ col }}
+                <input name="{{ col }}" type="text" />
+              </label>
+              {% endfor %}
+            </div>
+            <div class="row-controls">
+              <label>
+                Top SHAP drivers
+                <input type="number" id="form-top-k" min="1" max="15" value="{{ default_top_k }}" />
+              </label>
+              <button type="submit" class="btn primary" {% if not ready %}disabled{% endif %}>Score landlord</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </details>
+
+    <section class="results-stage" id="results-stage">
+      <div class="results-toolbar">
+        <div>
+          <h2>Results</h2>
+          <p id="results-meta" class="muted">No scores yet — score a file or landlord to begin.</p>
+        </div>
+        <div class="filters hidden" id="filters">
+          <input type="search" id="search-id" placeholder="Search landlord ID…" autocomplete="off" />
+          <select id="filter-band">
+            <option value="all">All bands</option>
+            <option value="good">Good</option>
+            <option value="neutral">Neutral</option>
+            <option value="bad">Bad</option>
+          </select>
+          <select id="sort-by">
+            <option value="score-desc">Score ↓</option>
+            <option value="score-asc">Score ↑</option>
+            <option value="id-asc">ID A–Z</option>
+            <option value="band">Band</option>
+          </select>
+        </div>
+      </div>
+
+        <div id="results-error" class="banner warn hidden"></div>
+        <div id="results-pipeline-note" class="banner info hidden"></div>
+        <div id="results-input-warning" class="banner warn hidden"></div>
+        <div id="results-loading" class="loading hidden">
+        <span class="spinner"></span>
+        Scoring with SHAP explanations…
+      </div>
+      <div id="results-empty" class="empty-state">
+        <p>Results appear here as a table. Click a row to see why the model scored that landlord.</p>
+      </div>
+
+      <div id="results-layout" class="results-layout hidden">
+        <div class="table-wrap">
+          <table class="score-table" id="score-table">
+            <thead>
+              <tr>
+                <th>Landlord</th>
+                <th>Band</th>
+                <th>Score</th>
+                <th>Quality</th>
+                <th>Percentile</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="score-tbody"></tbody>
+          </table>
+          <p id="filter-count" class="muted filter-count"></p>
+        </div>
+
+        <aside class="detail-panel" id="detail-panel" aria-live="polite">
+          <div class="detail-placeholder" id="detail-placeholder">
+            <p>Select a landlord in the table to view score drivers.</p>
+          </div>
+          <div class="detail-content hidden" id="detail-content"></div>
+        </aside>
+      </div>
+    </section>
+
+    {% if glossary %}
+    <details class="glossary-drawer">
+      <summary>Feature meanings (glossary)</summary>
+      <div class="glossary-grid">
+        {% for g in glossary %}
+        <article>
+          <h3>{{ g.label }}</h3>
+          <p>{{ g.description }}</p>
+          <code>{{ g.feature }}</code>
+        </article>
+        {% endfor %}
+      </div>
+    </details>
+    {% endif %}
+  </main>
+
+  <footer class="foot">
+    <span>SHAP explains the prediction — not proven causation.</span>
+    <a href="/api/health">/api/health</a>
+    <a href="/docs">API docs</a>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
