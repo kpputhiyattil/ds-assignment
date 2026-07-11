@@ -243,10 +243,11 @@ NON_NEGATIVE_COLS_LANDLORDS = [
 
 NON_NEGATIVE_COLS_COMPANIES = [
     "SalesOfMainProduct", "SalesOfOtherProduct", "MonthlyBudget",
-    "TotalActiveClients", "TotalVisitorsInTheLast7Days", "ClientsInTheLast7Days",
-    "TotalVisitorsInTheLast6Month", "ClientsInTheLast6Month",
-    "TotalVisitorsInTheLast12Month", "ClientsInTheLast12Month",
-    "Investments", "ReturningClient",
+    "TotalActiveClients", "TodaysClients", "ClientsInTheLast7Days",
+    "ClientsInTheLast6Months", "ClientsInTheLast12Months",
+    "TotalClientsInTheLast7Days", "TotalClientsInTheLast6Months",
+    "TotalClientsInTheLast12Months",
+    "Investments", "ReturningClient", "Rank",
 ]
 
 DENOMINATOR_COLS = ["Area", "ActiveCompanies", "MonthlyBudget"]
@@ -294,13 +295,13 @@ def check_ranges(
 # ---------------------------------------------------------------------------
 
 TIME_WINDOW_PAIRS = [
-    # (short_col, long_col, description)
-    ("ClientsInTheLast7Days", "ClientsInTheLast6Month", "clients 7d vs 6m"),
-    ("ClientsInTheLast7Days", "ClientsInTheLast12Month", "clients 7d vs 12m"),
-    ("ClientsInTheLast6Month", "ClientsInTheLast12Month", "clients 6m vs 12m"),
-    ("TotalVisitorsInTheLast7Days", "TotalVisitorsInTheLast6Month", "visitors 7d vs 6m"),
-    ("TotalVisitorsInTheLast7Days", "TotalVisitorsInTheLast12Month", "visitors 7d vs 12m"),
-    ("TotalVisitorsInTheLast6Month", "TotalVisitorsInTheLast12Month", "visitors 6m vs 12m"),
+    # (short_col, long_col, description) — names match Companies.parquet
+    ("ClientsInTheLast7Days", "ClientsInTheLast6Months", "clients 7d vs 6m"),
+    ("ClientsInTheLast7Days", "ClientsInTheLast12Months", "clients 7d vs 12m"),
+    ("ClientsInTheLast6Months", "ClientsInTheLast12Months", "clients 6m vs 12m"),
+    ("TotalClientsInTheLast7Days", "TotalClientsInTheLast6Months", "total clients 7d vs 6m"),
+    ("TotalClientsInTheLast7Days", "TotalClientsInTheLast12Months", "total clients 7d vs 12m"),
+    ("TotalClientsInTheLast6Months", "TotalClientsInTheLast12Months", "total clients 6m vs 12m"),
 ]
 
 
@@ -605,6 +606,11 @@ if __name__ == "__main__":
     import json
     import sys
     from pathlib import Path
+
+    # Allow `python src/data/validation.py` as well as `python -m src.data.validation`
+    _root = Path(__file__).resolve().parents[2]
+    if str(_root) not in sys.path:
+        sys.path.insert(0, str(_root))
 
     logging.basicConfig(
         level=logging.INFO,

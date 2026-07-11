@@ -182,10 +182,12 @@ class TestTimeWindowConsistency:
 
     def test_7d_exceeding_6m_triggers_warning(self):
         df = pd.DataFrame({
-            "ClientsInTheLast7Days": [100, 5], "ClientsInTheLast6Month": [10, 50],
-            "ClientsInTheLast12Month": [15, 70],
-            "TotalVisitorsInTheLast7Days": [50, 20], "TotalVisitorsInTheLast6Month": [200, 100],
-            "TotalVisitorsInTheLast12Month": [300, 150],
+            "ClientsInTheLast7Days": [100, 5],
+            "ClientsInTheLast6Months": [10, 50],
+            "ClientsInTheLast12Months": [15, 70],
+            "TotalClientsInTheLast7Days": [50, 20],
+            "TotalClientsInTheLast6Months": [200, 100],
+            "TotalClientsInTheLast12Months": [300, 150],
         })
         r = QualityReport()
         check_time_window_consistency(df, r, violation_threshold_pct=0.0)

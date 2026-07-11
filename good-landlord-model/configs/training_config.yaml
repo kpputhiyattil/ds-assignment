@@ -28,10 +28,20 @@ target:
   # Strategy: "status" | "composite" | "both"
   strategy: both
 
-  # CompanyStatus → binary mapping (extend after data inspection)
-  status_positive: ["Active", "active", "Operating", "operating", "Open", "open"]
-  status_negative: ["Closed", "closed", "Failed", "failed", "Inactive", "inactive", "Bankrupt", "bankrupt"]
-  status_exclude:  []   # statuses to drop from binary training (ambiguous)
+  # CompanyStatus → binary mapping (from EDA on Companies.parquet)
+  status_positive:
+    - "Actively Seeking New Employees"
+    - "Will Consider New Projects"
+  status_negative:
+    - "Out of Business"
+    - "Not Making New Products"
+    - "Reducing Activity"
+  # Ambiguous / sparse labels excluded from binary status target
+  status_exclude:
+    - "None"
+    - "Other"
+    - "Acquired/Merged"
+    - "Acquired/Merged (Operating Subsidiary)"
 
   # Composite score weights (must sum to 1.0)
   composite_weights:
