@@ -39,3 +39,9 @@ all: events interval features labels train ablation explain
 clean:
 	rm -rf data/processed/* data/artifacts/*
 	touch data/processed/.gitkeep data/artifacts/.gitkeep
+
+package:
+	python -m src.serving.package
+
+serve:
+	uvicorn src.serving.api:app --reload

@@ -24,6 +24,7 @@ import logging
 import polars as pl
 
 from src.config import Config, get_config
+from src.data.ingestion import aggregate_same_day
 from src.features.interval import (
     CONFIDENCE,
     INTERVAL,
@@ -146,7 +147,9 @@ def build_scoring_features(
     cfg = cfg or get_config()
     s = cfg.schema_
     cust = s.customer_id_col
-    lf = events.lazy() if isinstance(events, pl.DataFrame) else events
+    # Serving receives RAW invoices: apply the same same-day aggregation used to
+    # build training billing events, so there is no train/serve skew.
+    lf = aggregate_same_day(events, cfg)
 
     core = _core_features(lf, snapshot, cfg)
     iv = infer_intervals(lf, snapshot, cfg).rename({"days_since_last": "recency_days"})
@@ -155,7 +158,8 @@ def build_scoring_features(
     )
     mat = iv.join(core, on=cust, how="left")
     keep = [cust, INTERVAL, CONFIDENCE] + feature_columns()
-    keep = [c for c in keep if c in mat.columns]
+    seen: set[str] = set()
+    keep = [c for c in keep if c in mat.columns and not (c in seen or seen.add(c))]
     return mat.select(keep)
 
 

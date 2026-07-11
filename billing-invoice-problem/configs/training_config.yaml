@@ -79,4 +79,4 @@ decision:
   continue_max_risk: 0.30
   nogo_min_risk: 0.70
   # Low interval confidence routes to Review (data-quality), never auto No-Go.
-  min_interval_confidence_for_auto: 0.40
+  min_interval_confidence_for_auto: 0.50

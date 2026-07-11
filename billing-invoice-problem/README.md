@@ -61,14 +61,35 @@ make explain    # SHAP global/local
 
 ## Build progress
 
-- [x] **Step 1 — Initial setup**: scaffold, config system, dependencies, smoke tests
-- [ ] Step 2 — Data loader + validation
-- [ ] Step 3 — Interval inference engine
-- [ ] Step 4 — Features + dollar-churn labels
-- [ ] Step 5 — Two-part model training
-- [ ] Step 6 — Ablation harness + business metrics
-- [ ] Step 7 — SHAP explainability
-- [ ] Step 8 — Decision layer + optional serving
+- [x] **Step 1** — Initial setup: scaffold, config system, dependencies, smoke tests
+- [x] **Step 2** — Data loader + validation (same-day aggregation -> billing_events)
+- [x] **Step 3** — Interval inference engine (8-class, skipped-period matching, confidence)
+- [x] **Step 4** — Leakage-safe features (core/gap/interval) + dollar-churn labels
+- [x] **Step 5** — Two-part model: calibrated frequency + severity, temporal eval
+- [x] **Step 6** — Ablation harness (bootstrap + DeLong) -> interval-value verdict
+- [x] **Step 7** — TreeSHAP global importance + per-customer decision briefings
+- [x] **Step 8** — Decision layer + packaged artifact + FastAPI + drift monitoring
+
+### Headline result
+
+The inferred interval delivers a small but **statistically significant** lift over
+customer-health features (Ablation 1) -> it is "good enough" to substitute for the
+missing real interval and unblock the Continue/Review/No-Go decision. It is largely
+**redundant with raw gap features** (Ablation 2), so it is optional if those are
+already engineered. See `data/artifacts/ablation_report.json`.
+
+## Serving
+
+```bash
+make package                       # bundle FE + models + SHAP explainer into one artifact
+uvicorn src.serving.api:app --reload
+# POST /assess  { customer_id, invoices: [{date, amount}], snapshot? }
+```
+
+The decision layer maps expected churn -> Continue / Review / No-Go, with a
+**data-quality guardrail**: interval_confidence below
+`decision.min_interval_confidence_for_auto` routes to Review (never auto No-Go).
+Feature drift is monitored via PSI (`src/serving/monitoring.py`).
 
 ## Reproducibility
 
