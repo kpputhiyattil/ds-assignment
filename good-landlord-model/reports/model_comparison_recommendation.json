@@ -1,0 +1,79 @@
+{
+  "best_model": "catboost",
+  "reason": "catboost is recommended: best mae_mean=0.01192 (\u00b10.00022), spearman_mean=0.87069. Near-tie with xgboost (mae_mean gap 0.34%).",
+  "winners_by_metric": {
+    "mae_mean": "catboost",
+    "rmse_mean": "xgboost",
+    "r2_mean": "xgboost",
+    "spearman_mean": "catboost"
+  },
+  "best_row": {
+    "model_type": "catboost",
+    "mae_mean": 0.01192,
+    "mae_std": 0.00022,
+    "rmse_mean": 0.01613,
+    "rmse_std": 0.00039,
+    "r2_mean": 0.7804,
+    "r2_std": 0.0034,
+    "spearman_mean": 0.87069,
+    "spearman_std": 0.0048,
+    "n_folds": 5,
+    "n_landlords": 14838
+  },
+  "comparison": [
+    {
+      "model_type": "catboost",
+      "mae_mean": 0.01192,
+      "mae_std": 0.00022,
+      "rmse_mean": 0.01613,
+      "rmse_std": 0.00039,
+      "r2_mean": 0.7804,
+      "r2_std": 0.0034,
+      "spearman_mean": 0.87069,
+      "spearman_std": 0.0048,
+      "n_folds": 5,
+      "n_landlords": 14838
+    },
+    {
+      "model_type": "xgboost",
+      "mae_mean": 0.01196,
+      "mae_std": 0.00024,
+      "rmse_mean": 0.01608,
+      "rmse_std": 0.0004,
+      "r2_mean": 0.78181,
+      "r2_std": 0.00374,
+      "spearman_mean": 0.87005,
+      "spearman_std": 0.00402,
+      "n_folds": 5,
+      "n_landlords": 14838
+    },
+    {
+      "model_type": "lightgbm",
+      "mae_mean": 0.01207,
+      "mae_std": 0.00028,
+      "rmse_mean": 0.01622,
+      "rmse_std": 0.00045,
+      "r2_mean": 0.77806,
+      "r2_std": 0.00484,
+      "spearman_mean": 0.86797,
+      "spearman_std": 0.00388,
+      "n_folds": 5,
+      "n_landlords": 14838
+    },
+    {
+      "model_type": "random_forest",
+      "mae_mean": 0.01338,
+      "mae_std": 0.00019,
+      "rmse_mean": 0.01788,
+      "rmse_std": 0.00035,
+      "r2_mean": 0.73012,
+      "r2_std": 0.00661,
+      "spearman_mean": 0.84154,
+      "spearman_std": 0.00477,
+      "n_folds": 5,
+      "n_landlords": 14838
+    }
+  ],
+  "report_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\model_comparison_report.md",
+  "csv_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\landlord_model_comparison.csv"
+}

@@ -82,6 +82,8 @@ python -m src.data.validation
 # Pipeline runners (scripts/ = entrypoints; src/ = reusable library code)
 python scripts/run_eda.py
 python scripts/run_company_targets.py
+python scripts/run_landlord_models.py
+python scripts/compare_landlord_models.py
 
 # Fit OOF company baseline + compute adjusted landlord scores
 python -m src.models.company_baseline

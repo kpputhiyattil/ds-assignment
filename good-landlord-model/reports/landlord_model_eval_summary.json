@@ -1,0 +1,153 @@
+{
+  "feature_set": "with_portfolio",
+  "n_landlords": 14838,
+  "numeric_features": [
+    "LandlordAge",
+    "Area",
+    "TotalPopulationAround",
+    "ActiveCompanies",
+    "PopulationDensity",
+    "AreaPerCompany",
+    "PopulationPerCompany",
+    "PortfolioSize",
+    "PortfolioActiveRate",
+    "PortfolioMeanBudget",
+    "PortfolioStdBudget",
+    "PortfolioMeanSales",
+    "PortfolioMeanClients",
+    "PortfolioMeanRetention",
+    "PortfolioMeanSuccessScore",
+    "PortfolioStdSuccessScore"
+  ],
+  "categorical_features": [
+    "PreferredIndustry",
+    "OriginCity",
+    "OriginCountry"
+  ],
+  "models": {
+    "catboost": {
+      "mean_metrics": {
+        "mae": 0.011921188640073799,
+        "rmse": 0.016128868713233675,
+        "r2": 0.780400804017404,
+        "spearman": 0.8706921018161017
+      },
+      "std_metrics": {
+        "mae": 0.000224678956907053,
+        "rmse": 0.0003865923075697884,
+        "r2": 0.0033992055138501297,
+        "spearman": 0.004799670067003304
+      },
+      "oof_metrics": {
+        "oof_mae": 0.01192121608336438,
+        "oof_rmse": 0.016133556180070983,
+        "oof_r2": 0.7804354040965555,
+        "oof_spearman": 0.8707017599735817,
+        "oof_n": 14838
+      },
+      "quality_bands": {
+        "top_capture_rate": 0.7630278526504941,
+        "bottom_capture_rate": 0.8180592991913747,
+        "n_true_top": 4452,
+        "n_true_bottom": 4452,
+        "n_pred_top": 4452,
+        "n_pred_bottom": 4452
+      },
+      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_catboost.joblib",
+      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_catboost.csv"
+    },
+    "xgboost": {
+      "mean_metrics": {
+        "mae": 0.01196474781323566,
+        "rmse": 0.016077171906035387,
+        "r2": 0.7818119153919848,
+        "spearman": 0.8700515011158035
+      },
+      "std_metrics": {
+        "mae": 0.0002445946709339191,
+        "rmse": 0.0004029620388369505,
+        "r2": 0.0037391302077559624,
+        "spearman": 0.004019111730644039
+      },
+      "oof_metrics": {
+        "oof_mae": 0.011964778420548678,
+        "oof_rmse": 0.016082278724753686,
+        "oof_r2": 0.781828875168235,
+        "oof_spearman": 0.8700958967926156,
+        "oof_n": 14838
+      },
+      "quality_bands": {
+        "top_capture_rate": 0.7585354896675651,
+        "bottom_capture_rate": 0.8169362084456424,
+        "n_true_top": 4452,
+        "n_true_bottom": 4452,
+        "n_pred_top": 4452,
+        "n_pred_bottom": 4452
+      },
+      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_xgboost.joblib",
+      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_xgboost.csv"
+    },
+    "lightgbm": {
+      "mean_metrics": {
+        "mae": 0.012068170407229949,
+        "rmse": 0.01621525263573533,
+        "r2": 0.7780611212320344,
+        "spearman": 0.867969423733302
+      },
+      "std_metrics": {
+        "mae": 0.00027922855902226225,
+        "rmse": 0.00045297584744387727,
+        "r2": 0.004837544360690341,
+        "spearman": 0.0038778284268544145
+      },
+      "oof_metrics": {
+        "oof_mae": 0.012068205634651644,
+        "oof_rmse": 0.016221641666194653,
+        "oof_r2": 0.7780313152331902,
+        "oof_spearman": 0.8679856753987398,
+        "oof_n": 14838
+      },
+      "quality_bands": {
+        "top_capture_rate": 0.7585354896675651,
+        "bottom_capture_rate": 0.8155884995507637,
+        "n_true_top": 4452,
+        "n_true_bottom": 4452,
+        "n_pred_top": 4452,
+        "n_pred_bottom": 4452
+      },
+      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_lightgbm.joblib",
+      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_lightgbm.csv"
+    },
+    "random_forest": {
+      "mean_metrics": {
+        "mae": 0.013378706096749769,
+        "rmse": 0.01787692326143046,
+        "r2": 0.7301237774106554,
+        "spearman": 0.8415419491987054
+      },
+      "std_metrics": {
+        "mae": 0.00018973135408198945,
+        "rmse": 0.0003531115274522377,
+        "r2": 0.006611825202426363,
+        "spearman": 0.00477348613288982
+      },
+      "oof_metrics": {
+        "oof_mae": 0.013378735131965651,
+        "oof_rmse": 0.01788046784180071,
+        "oof_r2": 0.7303130962577276,
+        "oof_spearman": 0.841336843553896,
+        "oof_n": 14838
+      },
+      "quality_bands": {
+        "top_capture_rate": 0.7205750224618149,
+        "bottom_capture_rate": 0.8005390835579514,
+        "n_true_top": 4452,
+        "n_true_bottom": 4452,
+        "n_pred_top": 4452,
+        "n_pred_bottom": 4452
+      },
+      "model_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\data\\artifacts\\landlord_model_random_forest.joblib",
+      "importance_path": "D:\\Personal\\DS\\ds-assignment\\good-vs-bad-landlord\\ds-assignment\\good-landlord-model\\reports\\feature_importance_random_forest.csv"
+    }
+  }
+}

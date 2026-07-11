@@ -97,6 +97,30 @@ landlord_model:
     random_seed: 42
     verbose: False
     early_stopping_rounds: 100
+  xgboost:
+    n_estimators: 1000
+    max_depth: 5
+    learning_rate: 0.03
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_lambda: 1.0
+    random_state: 42
+    early_stopping_rounds: 50
+  lightgbm:
+    n_estimators: 1000
+    max_depth: 5
+    learning_rate: 0.03
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_lambda: 1.0
+    random_state: 42
+    early_stopping_rounds: 50
+    verbose: -1
+  random_forest:
+    n_estimators: 500
+    max_depth: 8
+    min_samples_leaf: 2
+    random_state: 42
   # Features included in each model variant
   feature_sets:
     landlord_only: true   # always train landlord-only model (works for new landlords)

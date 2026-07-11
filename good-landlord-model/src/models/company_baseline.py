@@ -3,15 +3,12 @@ company_baseline.py — Out-of-fold company baseline + adjusted landlord score.
 
 Pipeline
 --------
-1. Train a LogisticRegression on CompanyIsActive using StratifiedKFold OOF so
-   each company's predicted probability comes from a model that never saw it.
+1. Train LogisticRegression on CompanyIsActive using GroupKFold(LandLordID) OOF
+   so each company's predicted probability comes from a model that never saw
+   that landlord's portfolio (leakage control from the project document).
 2. Compute residual = actual − predicted_prob for each company.
-   Positive residual → company outperformed what the market predicts.
-   Negative residual → company underperformed.
 3. Aggregate residuals per landlord (mean across their portfolio).
-4. Apply Empirical-Bayes shrinkage to correct for landlords with small portfolios:
-       AdjustedScore = N/(N+m) * RawScore + m/(N+m) * GlobalMean
-   where m = cfg["shrinkage_m"] (default 10).
+4. Apply Empirical-Bayes shrinkage for small tenant counts.
 
 Public API
 ----------
@@ -37,7 +34,7 @@ import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -47,7 +44,7 @@ _DEFAULT_N_SPLITS: int = 5
 _DEFAULT_SHRINKAGE_M: float = 10.0
 _DEFAULT_SEED: int = 42
 
-# Columns excluded from auto-detected feature set
+# Columns excluded from auto-detected feature set (IDs, targets, OOF, categoricals)
 _EXCLUDE_COLS: frozenset[str] = frozenset({
     "CompanyID",
     "LandLordID",
@@ -64,6 +61,21 @@ _EXCLUDE_COLS: frozenset[str] = frozenset({
     "PreferredIndustry",
 })
 
+# Outcome-window signals that would create circularity with SuccessScore components
+_CIRCULAR_COLS: frozenset[str] = frozenset({
+    "SalesOfMainProduct",
+    "SalesOfOtherProduct",
+    "ReturningClient",
+    "TotalActiveClients",
+    "TodaysClients",
+    "ClientsInTheLast7Days",
+    "ClientsInTheLast6Months",
+    "ClientsInTheLast12Months",
+    "TotalClientsInTheLast7Days",
+    "TotalClientsInTheLast6Months",
+    "TotalClientsInTheLast12Months",
+})
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -72,21 +84,47 @@ _EXCLUDE_COLS: frozenset[str] = frozenset({
 
 def _resolve_cfg(cfg: dict | None) -> dict:
     """
-    Accept either the full training config or a subsection.
+    Accept full training config or a subsection.
 
-    Tries keys: 'baseline', 'model'; falls back to root dict.
+    Priority:
+      1. cfg["baseline"] or cfg["model"] subsection (unit-test / legacy)
+      2. Flatten company_baseline + landlord_score.shrinkage_m + seed from full cfg
+      3. Bare flat dict returned as-is
     """
     if cfg is None:
         return {}
+
     for key in ("baseline", "model"):
-        if key in cfg and isinstance(cfg[key], dict):
-            return cfg[key]
-    return cfg
+        section = cfg.get(key)
+        if isinstance(section, dict):
+            return dict(section)
+
+    cb = cfg.get("company_baseline")
+    ls = cfg.get("landlord_score")
+    if isinstance(cb, dict) or isinstance(ls, dict):
+        out: dict = {}
+        if "seed" in cfg:
+            out["seed"] = cfg["seed"]
+        if isinstance(cb, dict):
+            out["n_splits"] = int(cb.get("cv_folds", cb.get("n_splits", _DEFAULT_N_SPLITS)))
+            lr = cb.get("logistic_regression", {})
+            if isinstance(lr, dict) and "C" in lr:
+                out["lr_C"] = float(lr["C"])
+            if "lr_C" in cb:
+                out["lr_C"] = float(cb["lr_C"])
+            if "shrinkage_m" in cb:
+                out["shrinkage_m"] = float(cb["shrinkage_m"])
+        if isinstance(ls, dict) and "shrinkage_m" in ls:
+            out["shrinkage_m"] = float(ls["shrinkage_m"])
+        return out
+
+    return dict(cfg)
 
 
 def _auto_feature_cols(df: pd.DataFrame, exclude: frozenset = _EXCLUDE_COLS) -> list[str]:
-    """Return numeric columns that are not in the exclude set."""
-    return [c for c in df.select_dtypes(include="number").columns if c not in exclude]
+    """Return numeric columns excluding IDs/targets and circular outcome signals."""
+    ban = exclude | _CIRCULAR_COLS
+    return [c for c in df.select_dtypes(include="number").columns if c not in ban]
 
 
 def _make_pipeline(seed: int, C: float = 1.0) -> Pipeline:
@@ -119,17 +157,19 @@ def compute_oof_predictions(
     """
     Fit LogisticRegression OOF on CompanyIsActive and append predictions.
 
-    Each row's predicted probability comes from a model fold that excluded it,
-    preventing label leakage into the company-level residuals.
+    Each row's predicted probability comes from a model fold that excluded it
+    (and all other companies of the same landlord), preventing label leakage.
 
     Parameters
     ----------
-    model_base    : DataFrame containing 'CompanyIsActive' + numeric features.
+    model_base    : DataFrame containing 'CompanyIsActive', 'LandLordID',
+                    and numeric features.
                     Rows where CompanyIsActive is NaN are skipped (OOF cols → NaN).
     feature_cols  : explicit feature list; None = auto-detect numeric columns
+                    (excluding circular outcome signals)
     cfg           : training config dict; keys used:
                       seed         (int, default 42)
-                      n_splits     (int, default 5)
+                      n_splits     (int, default 5)  — or company_baseline.cv_folds
                       lr_C         (float, default 1.0)
     return_model  : if True, return (DataFrame, Pipeline) where the Pipeline
                     is fitted on ALL labeled rows (for production scoring)
@@ -145,6 +185,10 @@ def compute_oof_predictions(
         raise ValueError(
             "'CompanyIsActive' column not found in model_base. "
             "Run build_targets() before compute_oof_predictions()."
+        )
+    if "LandLordID" not in model_base.columns:
+        raise ValueError(
+            "'LandLordID' column not found in model_base — required for GroupKFold."
         )
 
     resolved = _resolve_cfg(cfg)
@@ -162,6 +206,7 @@ def compute_oof_predictions(
 
     df_labeled = model_base[labeled_mask].copy()
     y = df_labeled["CompanyIsActive"].astype(float).values
+    groups = df_labeled["LandLordID"].astype(str).values
 
     # Feature selection
     if feature_cols is None:
@@ -181,13 +226,15 @@ def compute_oof_predictions(
 
     X = df_labeled[feature_cols].values.astype(float)
     n_labeled = len(df_labeled)
+    n_groups = len(np.unique(groups))
 
     logger.info(
-        "OOF LR: n_labeled=%d, n_features=%d, n_splits=%d, seed=%d, C=%.3f",
-        n_labeled, len(feature_cols), n_splits, seed, lr_C,
+        "OOF LR (GroupKFold by LandLordID): n_labeled=%d, n_landlords=%d, "
+        "n_features=%d, n_splits=%d, seed=%d, C=%.3f, features=%s",
+        n_labeled, n_groups, len(feature_cols), n_splits, seed, lr_C, feature_cols,
     )
 
-    # Clamp n_splits if minority class is too small
+    # Clamp n_splits if too few landlords
     class_counts = np.bincount(y.astype(int))
     min_class = int(class_counts.min()) if len(class_counts) >= 2 else 0
     if min_class == 0:
@@ -195,19 +242,20 @@ def compute_oof_predictions(
             "CompanyIsActive has only one class — cannot train a classifier. "
             "Check the binary_target output."
         )
-    if min_class < n_splits:
-        n_splits = max(2, min_class)
+    n_splits = max(2, min(n_splits, n_groups, min_class))
+    if n_splits < int(resolved.get("n_splits", _DEFAULT_N_SPLITS)):
         logger.warning(
-            "Clamped n_splits to %d (minority class size = %d).", n_splits, min_class
+            "Clamped n_splits to %d (n_landlords=%d, minority_class=%d).",
+            n_splits, n_groups, min_class,
         )
 
     pipe = _make_pipeline(seed=seed, C=lr_C)
-    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    gkf = GroupKFold(n_splits=n_splits)
 
     oof_probs = np.full(n_labeled, np.nan)
     oof_folds = np.full(n_labeled, -1, dtype=int)
 
-    for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+    for fold_idx, (train_idx, val_idx) in enumerate(gkf.split(X, y, groups)):
         pipe.fit(X[train_idx], y[train_idx])
         oof_probs[val_idx] = pipe.predict_proba(X[val_idx])[:, 1]
         oof_folds[val_idx] = fold_idx
