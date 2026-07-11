@@ -62,17 +62,17 @@ class TestBinaryTarget:
 
     def test_case_insensitive(self):
         df = pd.DataFrame({"CompanyStatus": ["ACTIVE", "active", "Active", "closed"]})
-        assert binary_target(df).tolist() == [1, 1, 1, 0]
+        assert binary_target(df).tolist() == [1.0, 1.0, 1.0, 0.0]
 
     def test_missing_status_maps_to_0(self):
         df = pd.DataFrame({"CompanyStatus": ["Active", None, "Closed"]})
-        assert binary_target(df).tolist() == [1, 0, 0]
+        assert binary_target(df).tolist() == [1.0, 0.0, 0.0]
 
     def test_name_is_company_is_active(self, companies):
         assert binary_target(companies).name == "CompanyIsActive"
 
-    def test_dtype_is_int(self, companies):
-        assert binary_target(companies).dtype in (int, np.int64, np.int32)
+    def test_dtype_is_float_nullable(self, companies):
+        assert binary_target(companies).dtype == float
 
     def test_missing_column_raises(self, companies):
         with pytest.raises(ValueError, match="CompanyStatus"):
@@ -80,7 +80,7 @@ class TestBinaryTarget:
 
     def test_custom_active_labels(self):
         df = pd.DataFrame({"CompanyStatus": ["Open", "Closed", "Open"]})
-        assert binary_target(df, active_labels={"Open"}).tolist() == [1, 0, 1]
+        assert binary_target(df, active_labels={"Open"}).tolist() == [1.0, 0.0, 1.0]
 
     def test_all_active(self):
         df = pd.DataFrame({"CompanyStatus": ["Active"] * 10})

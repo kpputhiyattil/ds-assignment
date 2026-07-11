@@ -11,9 +11,11 @@ plot_numeric_distributions(df, ...)  -> None           histogram grid
 plot_category_frequencies(df, ...)   -> None           bar-chart grid
 plot_portfolio_distribution(bridge)  -> None           companies-per-landlord histogram
 plot_correlation_heatmap(df, ...)    -> None           Pearson heatmap for numeric cols
+run_eda(...)                         -> dict           full EDA report dict
+write_eda_report(...)                -> (Path, Path)   versioned JSON + Markdown
 
-All plot functions return None and call plt.show() unless ax is supplied,
-so they work both in notebooks and as standalone scripts.
+To run EDA on actual raw data:
+    python scripts/run_eda.py
 """
 from __future__ import annotations
 
@@ -1225,47 +1227,3 @@ def _archive_legacy_flat_reports(reports_dir: Path, runs_dir: Path) -> None:
         shutil.copytree(old_figures, dest_fig, dirs_exist_ok=True)
 
     logger.info("Archived previous flat EDA report to %s", legacy_dir)
-
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    import sys
-    from pathlib import Path as _Path
-
-    _root = _Path(__file__).resolve().parents[2]
-    if str(_root) not in sys.path:
-        sys.path.insert(0, str(_root))
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    )
-
-    json_path, md_path = write_eda_report(save_plots=True)
-    # Reload for summary print
-    with open(json_path, encoding="utf-8") as fp:
-        _report = json.load(fp)
-
-    print("\n" + "=" * 60)
-    print("EDA COMPLETE")
-    print("=" * 60)
-    print(f"Run dir:  {json_path.parent}")
-    print(f"JSON:     {json_path}")
-    print(f"Markdown: {md_path}")
-    print(f"Latest:   reports/eda_report.json | reports/eda_report.md")
-    print(f"Figures:  {len(_report.get('figures', []))} files")
-    print(f"Findings: {len(_report.get('findings', []))}")
-    print("-" * 60)
-    for i, f in enumerate(_report.get("findings", []), 1):
-        msg = (
-            f["message"][:100]
-            .replace("≥", ">=")
-            .replace("–", "-")
-            .replace("—", "-")
-            .replace("≈", "~=")
-            .replace("…", "...")
-        )
-        print(f"  {i}. [{f['severity']}] {f['area']}: {msg}")
-    print("=" * 60)

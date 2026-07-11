@@ -79,8 +79,9 @@ Each step below corresponds to one git commit. Run them in order:
 # Validate raw data and inspect quality report
 python -m src.data.validation
 
-# Build company success targets
-python -m src.targets.construction
+# Pipeline runners (scripts/ = entrypoints; src/ = reusable library code)
+python scripts/run_eda.py
+python scripts/run_company_targets.py
 
 # Fit OOF company baseline + compute adjusted landlord scores
 python -m src.models.company_baseline

@@ -12,17 +12,17 @@ SuccessScore  (continuous, float in [0, 1])
     Composite of five rank-normalised performance signals:
       sales_efficiency  = SalesOfMainProduct / (MonthlyBudget + eps)
       retention_rate    = ReturningClient / (TotalActiveClients + eps)
-      conversion_rate   = ClientsInTheLast6Month / (TotalVisitorsInTheLast6Month + eps)
-      momentum          = (ClientsInTheLast12Month - ClientsInTheLast6Month)
-                          / (TotalVisitorsInTheLast12Month + eps)
+      conversion_rate   = ClientsInTheLast6Months / (TotalClientsInTheLast6Months + eps)
+      momentum          = (ClientsInTheLast12Months - ClientsInTheLast6Months)
+                          / (TotalClientsInTheLast12Months + eps)
       client_scale      = TotalActiveClients  (absolute size signal)
 
     Each signal is rank-normalised to [0, 1], then combined via weighted sum
-    (weights from configs/training_config.yaml -> composite_weights).
+    (weights from configs/training_config.yaml -> target.composite_weights).
 
 Public API
 ----------
-binary_target(companies, ...)       -> pd.Series[int]
+binary_target(companies, ...)       -> pd.Series
 rank_normalize(series)              -> pd.Series[float]
 composite_score(companies, ...)     -> pd.Series[float]
 build_targets(companies, cfg)       -> pd.DataFrame  (companies + target cols)
@@ -41,14 +41,15 @@ logger = logging.getLogger(__name__)
 _EPS = 1e-6
 
 
-def _get_col(df: pd.DataFrame, col: str) -> pd.Series:
-    """Return column as float Series; if absent, return NaN Series of same length."""
-    if col in df.columns:
-        return pd.to_numeric(df[col], errors="coerce")
+def _get_col(df: pd.DataFrame, *candidates: str) -> pd.Series:
+    """Return the first matching column as float; NaN Series if none exist."""
+    for col in candidates:
+        if col in df.columns:
+            return pd.to_numeric(df[col], errors="coerce")
     return pd.Series(np.nan, index=df.index, dtype=float)
 
 
-# Default active labels (case-insensitive match)
+# Default active labels (case-insensitive match) — overridden by config
 _DEFAULT_ACTIVE_LABELS: frozenset[str] = frozenset({"active"})
 
 
@@ -60,24 +61,32 @@ _DEFAULT_ACTIVE_LABELS: frozenset[str] = frozenset({"active"})
 def binary_target(
     companies: pd.DataFrame,
     status_col: str = "CompanyStatus",
-    active_labels: set[str] | None = None,
+    active_labels: set[str] | list[str] | None = None,
+    inactive_labels: set[str] | list[str] | None = None,
+    exclude_labels: set[str] | list[str] | None = None,
 ) -> pd.Series:
     """
-    Map CompanyStatus to a binary 0/1 target.
+    Map CompanyStatus to a binary 0/1 target (NaN = excluded / unknown).
 
     Parameters
     ----------
-    companies     : DataFrame with at least `status_col`
-    status_col    : column containing status strings
-    active_labels : set of values treated as "active" (case-insensitive);
-                    defaults to {"active"}
+    companies       : DataFrame with at least `status_col`
+    status_col      : column containing status strings
+    active_labels   : treated as 1 (case-insensitive); default {"active"}
+    inactive_labels : treated as 0; if None, everything not active is 0 (legacy)
+    exclude_labels  : treated as NaN (dropped from binary training)
 
     Returns
     -------
-    pd.Series[int] named 'CompanyIsActive', same index as `companies`.
-    Missing values in `status_col` -> 0 (conservatively treated as inactive).
+    pd.Series named 'CompanyIsActive', same index as `companies`.
     """
-    labels = {lbl.lower() for lbl in (active_labels or _DEFAULT_ACTIVE_LABELS)}
+    labels_pos = {lbl.lower() for lbl in (active_labels or _DEFAULT_ACTIVE_LABELS)}
+    labels_neg = (
+        {lbl.lower() for lbl in inactive_labels} if inactive_labels is not None else None
+    )
+    labels_ex = (
+        {lbl.lower() for lbl in exclude_labels} if exclude_labels is not None else set()
+    )
 
     if status_col not in companies.columns:
         raise ValueError(
@@ -86,13 +95,31 @@ def binary_target(
         )
 
     raw = companies[status_col].fillna("").astype(str).str.strip().str.lower()
-    target = raw.isin(labels).astype(int)
+    missing_mask = raw.isin({"", "none", "nan", "null"}) | companies[status_col].isna()
+    raw = raw.mask(missing_mask, other=pd.NA)
+
+    target = pd.Series(np.nan, index=companies.index, dtype=float)
+    is_pos = raw.isin(labels_pos)
+    target[is_pos] = 1.0
+
+    if labels_neg is not None:
+        target[raw.isin(labels_neg)] = 0.0
+    else:
+        # Legacy: non-active (including missing) -> 0
+        target[:] = 0.0
+        target[is_pos] = 1.0
+
+    if labels_ex:
+        target[raw.isin(labels_ex)] = np.nan
+
     target.name = "CompanyIsActive"
 
-    n_active = target.sum()
+    n_active = int((target == 1).sum())
+    n_inactive = int((target == 0).sum())
+    n_excl = int(target.isna().sum())
     logger.info(
-        "Binary target: %d active / %d total (%.1f%%)",
-        n_active, len(target), n_active / len(target) * 100,
+        "Binary target: %d active / %d inactive / %d excluded-or-missing (total=%d)",
+        n_active, n_inactive, n_excl, len(target),
     )
     return target
 
@@ -136,29 +163,48 @@ def _safe_ratio(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
 
 def _sales_efficiency(df: pd.DataFrame) -> pd.Series:
     """Revenue per unit of budget — proxy for ROI."""
-    return _safe_ratio(_get_col(df, "SalesOfMainProduct"), _get_col(df, "MonthlyBudget")).rename("sales_efficiency")
+    return _safe_ratio(
+        _get_col(df, "SalesOfMainProduct"),
+        _get_col(df, "MonthlyBudget", "Monthly budget"),
+    ).rename("sales_efficiency")
 
 
 def _retention_rate(df: pd.DataFrame) -> pd.Series:
     """Fraction of active clients who are returning — loyalty signal."""
-    return _safe_ratio(_get_col(df, "ReturningClient"), _get_col(df, "TotalActiveClients")).rename("retention_rate")
+    return _safe_ratio(
+        _get_col(df, "ReturningClient"),
+        _get_col(df, "TotalActiveClients"),
+    ).rename("retention_rate")
 
 
 def _conversion_rate(df: pd.DataFrame) -> pd.Series:
-    """6-month clients / 6-month visitors — footfall-to-client efficiency."""
+    """6-month clients / 6-month totals — engagement efficiency."""
     return _safe_ratio(
-        _get_col(df, "ClientsInTheLast6Month"),
-        _get_col(df, "TotalVisitorsInTheLast6Month"),
+        _get_col(df, "ClientsInTheLast6Months", "ClientsInTheLast6Month"),
+        _get_col(
+            df,
+            "TotalClientsInTheLast6Months",
+            "TotalVisitorsInTheLast6Month",
+            "TotalClientsInTheLast6Month",
+        ),
     ).rename("conversion_rate")
 
 
 def _momentum(df: pd.DataFrame) -> pd.Series:
     """
-    Net new clients in the most-recent 6-month window, normalised by 12-month visitors.
+    Net new clients in the most-recent 6-month window, normalised by 12-month totals.
     Positive = growing; clipped at 0 to guard against data artefacts.
     """
-    net_new = (_get_col(df, "ClientsInTheLast12Month") - _get_col(df, "ClientsInTheLast6Month")).clip(lower=0)
-    return _safe_ratio(net_new, _get_col(df, "TotalVisitorsInTheLast12Month")).rename("momentum")
+    clients_12 = _get_col(df, "ClientsInTheLast12Months", "ClientsInTheLast12Month")
+    clients_6 = _get_col(df, "ClientsInTheLast6Months", "ClientsInTheLast6Month")
+    denom = _get_col(
+        df,
+        "TotalClientsInTheLast12Months",
+        "TotalVisitorsInTheLast12Month",
+        "TotalClientsInTheLast12Month",
+    )
+    net_new = (clients_12 - clients_6).clip(lower=0)
+    return _safe_ratio(net_new, denom).rename("momentum")
 
 
 def _client_scale(df: pd.DataFrame) -> pd.Series:
@@ -174,7 +220,7 @@ _COMPONENT_EXTRACTORS = {
     "active_clients":   _client_scale,
 }
 
-# Default weights (must sum to 1.0; overridden by cfg["composite_weights"])
+# Default weights (must sum to 1.0; overridden by cfg["target"]["composite_weights"])
 _DEFAULT_WEIGHTS: dict[str, float] = {
     "sales_efficiency": 0.30,
     "retention":        0.20,
@@ -259,6 +305,15 @@ def composite_score(
 # ---------------------------------------------------------------------------
 
 
+def _target_section(cfg: dict | None) -> dict:
+    """Accept full training cfg or a bare target/weights dict."""
+    if cfg is None:
+        return {}
+    if "target" in cfg and isinstance(cfg["target"], dict):
+        return cfg["target"]
+    return cfg
+
+
 def build_targets(
     companies: pd.DataFrame,
     cfg: dict | None = None,
@@ -269,21 +324,26 @@ def build_targets(
     Parameters
     ----------
     companies : raw or cleaned Companies DataFrame
-    cfg       : config dict (src.config.cfg); if None, uses defaults
+    cfg       : full training config (src.config.cfg) or a target subsection;
+                if None, uses defaults
 
     Returns
     -------
     pd.DataFrame with added columns:
-        CompanyIsActive  int    0 / 1
+        CompanyIsActive  float  0 / 1 / NaN
         SuccessScore     float  0.0 - 1.0
         SuccessScoreRank int    1 = best (dense rank)
     """
-    weights = None
-    if cfg is not None:
-        weights = cfg.get("composite_weights")
+    target_cfg = _target_section(cfg)
+    weights = target_cfg.get("composite_weights")
 
     out = companies.copy()
-    out["CompanyIsActive"] = binary_target(out)
+    out["CompanyIsActive"] = binary_target(
+        out,
+        active_labels=target_cfg.get("status_positive"),
+        inactive_labels=target_cfg.get("status_negative"),
+        exclude_labels=target_cfg.get("status_exclude"),
+    )
     out["SuccessScore"] = composite_score(out, weights=weights)
     out["SuccessScoreRank"] = (
         out["SuccessScore"]
@@ -291,10 +351,17 @@ def build_targets(
         .astype(int)
     )
 
+    n_labeled = int(out["CompanyIsActive"].notna().sum())
+    n_active = int((out["CompanyIsActive"] == 1).sum())
     logger.info(
-        "build_targets: %d companies — %d active (%.0f%%), SuccessScore [%.3f, %.3f]",
-        len(out), out["CompanyIsActive"].sum(), out["CompanyIsActive"].mean() * 100,
-        out["SuccessScore"].min(), out["SuccessScore"].max(),
+        "build_targets: %d companies — %d labeled binary (%d active, %.0f%% of labeled), "
+        "SuccessScore [%.3f, %.3f]",
+        len(out),
+        n_labeled,
+        n_active,
+        (n_active / n_labeled * 100) if n_labeled else 0.0,
+        out["SuccessScore"].min(),
+        out["SuccessScore"].max(),
     )
     return out
 
