@@ -157,7 +157,12 @@ def build_scoring_features(
         [(pl.col(INTERVAL) == c).cast(pl.Int8).alias(f"is_{c}") for c in INTERVAL_CLASSES]
     )
     mat = iv.join(core, on=cust, how="left")
-    keep = [cust, INTERVAL, CONFIDENCE] + feature_columns()
+    diag = [
+        "n_events", "n_gaps", "median_gap_days", "gap_cv", "amount_cv",
+        "dominant_base", "dominant_share", "n_distinct_bases",
+        "recency_days", "tenure_days",
+    ]
+    keep = [cust, INTERVAL, CONFIDENCE] + feature_columns() + diag
     seen: set[str] = set()
     keep = [c for c in keep if c in mat.columns and not (c in seen or seen.add(c))]
     return mat.select(keep)

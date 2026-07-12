@@ -1,0 +1,21 @@
+{
+  "n_customers": 50,
+  "recommendation_counts": {
+    "Review": 29,
+    "No-Go": 21
+  },
+  "mean_churn_probability": 0.8773,
+  "total_expected_dollar_churn": 12842.74,
+  "mean_interval_confidence": 0.5741,
+  "n_explained": 2,
+  "snapshot": "2025-03-05",
+  "model_version": "20260712_032913",
+  "source": "D:\\Personal\\DS\\ds-assignment\\billing-invoice-problem\\ds-assignment\\billing-invoice-problem\\data\\raw\\Invoices_users.parquet",
+  "generated_at": "2026-07-12T16:03:05.431709+00:00",
+  "run_dir": "D:\\Personal\\DS\\ds-assignment\\billing-invoice-problem\\ds-assignment\\billing-invoice-problem\\reports\\batch_assessment\\run_20260712_160305",
+  "truncated": true,
+  "max_customers_applied": 50,
+  "n_invoice_rows_loaded": 456,
+  "allow_full": false,
+  "interval_value_test_included": true
+}

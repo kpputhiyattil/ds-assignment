@@ -75,8 +75,19 @@ model:
 
 # --- Decision layer thresholds (expected dollar churn -> recommendation) ---
 decision:
-  # Placeholder thresholds; calibrated in Step 8 against business tolerance.
-  continue_max_risk: 0.30
+  # Loosened Continue band so healthy accounts with solid interval confidence
+  # can auto-clear (sensitivity on the 500-customer sample: Cont<=0.30 → 0%,
+  # Cont<=0.45 → a few %, Cont<=0.50 → ~4%).
+  continue_max_risk: 0.45
   nogo_min_risk: 0.70
   # Low interval confidence routes to Review (data-quality), never auto No-Go.
   min_interval_confidence_for_auto: 0.50
+
+# --- Serving / interactive load guards (API + Streamlit) ---
+# Interactive uploads never load the full 22M-row file unless an offline job
+# explicitly passes allow_full / --full.
+serving:
+  default_max_customers: 500
+  hard_max_customers: 5000
+  max_upload_mb: 128
+  max_invoice_rows: 2000000

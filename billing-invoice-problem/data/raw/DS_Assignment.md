@@ -108,6 +108,7 @@ In your mini report, address:
 
 ---
 
+
 ## 3. The Billing / Invoice Problem
 
 ### Background

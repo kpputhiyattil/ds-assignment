@@ -27,12 +27,15 @@ scikit-learn · SHAP · pydantic-settings (config) · pytest. FastAPI/Docker ser
 configs/training_config.yaml   # single source of truth (paths, seeds, hyperparams)
 src/
   config.py                    # typed config loader (pydantic-settings)
-  data/                        # ingestion + validation            (Step 2)
+  data/                        # ingestion + validation + EDA         (Step 2)
   features/                    # interval inference, features, labels (Steps 3-4)
   models/                      # two-part model, ablation, evaluate (Steps 5-6)
   explainability/              # SHAP                                (Step 7)
   serving/                     # decision layer + optional API      (Step 8)
+  reporting/                   # assessment mini-report from artifacts
+  scripts/                     # run_eda / run_assessment CLIs
 tests/                         # transform/leakage/label/api tests
+reports/{eda,assessment}/      # generated EDA + mini-report (committed narrative)
 data/{raw,processed,artifacts} # raw = input; processed/artifacts = generated (gitignored)
 ```
 
@@ -49,6 +52,7 @@ pytest                        # smoke tests should pass on a fresh clone
 Stages are built incrementally. Once implemented, the full run is:
 
 ```bash
+make eda        # invoice EDA (missingness, same-day, gaps) -> reports/eda/
 make events     # raw invoices -> billing_events (same-day aggregation, id check)
 make interval   # historical-only interval inference + confidence
 make features   # X_core / X_gap / X_interval (leakage-safe, per snapshot)
@@ -56,6 +60,7 @@ make labels     # dollar-churn labels (12mo past vs future)
 make train      # LightGBM frequency + severity, temporal CV
 make ablation   # two ablations x temporal folds + significance verdict
 make explain    # SHAP global/local
+make assess     # mini-report from artifacts -> reports/assessment/mini_report.md
 # or: make all
 ```
 
@@ -76,17 +81,64 @@ The inferred interval delivers a small but **statistically significant** lift ov
 customer-health features (Ablation 1) -> it is "good enough" to substitute for the
 missing real interval and unblock the Continue/Review/No-Go decision. It is largely
 **redundant with raw gap features** (Ablation 2), so it is optional if those are
-already engineered. See `data/artifacts/ablation_report.json`.
+already engineered. See `data/artifacts/ablation_report.json` and the written
+comparison narrative in `reports/assessment/mini_report.md` (`make assess`).
 
 ## Serving
 
+Package the feature-engineering path + calibrated models + SHAP capability into
+one artifact, then serve decisions via FastAPI. Streamlit is the analyst UI and
+calls the API (manual entry or CSV/Parquet upload).
+
 ```bash
-make package                       # bundle FE + models + SHAP explainer into one artifact
-uvicorn src.serving.api:app --reload
-# POST /assess  { customer_id, invoices: [{date, amount}], snapshot? }
+pip install -e ".[serving]"
+make package                       # -> data/artifacts/serving/churn_decision_model.joblib
+make batch-assess                  # score full Invoices_users.parquet + report
+make serve                         # FastAPI on :8000
+# in another terminal:
+make ui                            # Streamlit review app
 ```
 
-The decision layer maps expected churn -> Continue / Review / No-Go, with a
+| Endpoint | Purpose |
+|---|---|
+| `GET /health` | Liveness + model version |
+| `GET /model/info` | Package checklist / feature list |
+| `POST /assess` | One customer (JSON invoices) → explainable Continue/Review/No-Go |
+| `POST /assess/file` | Upload CSV/Parquet → **capped** batch scores + top-N SHAP briefings |
+
+Interactive uploads are guarded (config `serving.*`):
+
+- default **500** customers (hard max **5000**)
+- max upload **128 MB** (covers `Invoices_users.parquet` ~67 MB)
+- lazy parquet/CSV scan + filter **before** collecting rows
+
+Full-file offline scoring (opt-in only):
+
+```bash
+make batch-assess          # capped (safe default)
+make batch-assess-full     # entire file — memory-intensive
+```
+
+```bash
+# Single customer
+curl -X POST http://localhost:8000/assess -H "Content-Type: application/json" -d "{\"customer_id\":\"c1\",\"snapshot\":\"2025-03-05\",\"invoices\":[{\"date\":\"2024-01-15\",\"amount\":120},{\"date\":\"2024-02-15\",\"amount\":120}]}"
+
+# Full file (from Streamlit, or curl multipart)
+# POST /assess/file  file=@Invoices_users.parquet  snapshot=2025-03-05  explain_top_n=10
+```
+
+Batch report output (timestamped; previous runs kept):
+
+```text
+reports/batch_assessment/run_YYYYMMDD_HHMMSS/
+reports/batch_assessment/latest/          # pointer to newest run
+```
+
+Each batch report also embeds the **interval-value ablation summary** from
+`data/artifacts/ablation_report.json` (assignment part 3). That comparison is
+produced by `make ablation`, not by re-scoring the batch file.
+
+The decision layer maps churn risk → Continue / Review / No-Go, with a
 **data-quality guardrail**: interval_confidence below
 `decision.min_interval_confidence_for_auto` routes to Review (never auto No-Go).
 Feature drift is monitored via PSI (`src/serving/monitoring.py`).

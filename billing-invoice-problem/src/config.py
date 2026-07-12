@@ -80,6 +80,19 @@ class DecisionConfig(BaseModel):
     min_interval_confidence_for_auto: float = Field(ge=0, le=1)
 
 
+class ServingConfig(BaseModel):
+    """Safety limits for interactive file loads (API / Streamlit)."""
+
+    # Default customer cap when the caller does not pass max_customers.
+    default_max_customers: int = Field(default=500, gt=0)
+    # Absolute ceiling even if the client requests a larger cap.
+    hard_max_customers: int = Field(default=5000, gt=0)
+    # Reject uploads larger than this (MB) before parsing.
+    max_upload_mb: float = Field(default=128.0, gt=0)
+    # Hard row ceiling after customer filtering (crash guard).
+    max_invoice_rows: int = Field(default=2_000_000, gt=0)
+
+
 class Config(BaseModel):
     """Root configuration object (validated)."""
 
@@ -91,6 +104,7 @@ class Config(BaseModel):
     model: ModelConfig
     snapshots: list[dt.date]
     decision: DecisionConfig
+    serving: ServingConfig = Field(default_factory=ServingConfig)
 
     model_config = {"populate_by_name": True}
 

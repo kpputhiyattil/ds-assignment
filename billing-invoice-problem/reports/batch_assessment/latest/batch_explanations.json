@@ -1,0 +1,2609 @@
+[
+  {
+    "customer_id": "5WMfBPL6Riq9lJeb",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.6131,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 25 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **61%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 1.0,
+    "expected_dollar_churn": 30.02,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (61%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 30.02,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (61%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 26); days since last invoice (value 567); average invoice amount (value 49.00). Factors pulling risk down: billing-interval confidence (value 0.61); largest invoice amount (value 49.00); most recent invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "26",
+            "shap": 2.8177
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "567",
+            "shap": 0.8581
+          },
+          {
+            "feature": "mean_amount",
+            "label": "average invoice amount",
+            "value": "49.00",
+            "shap": 0.4905
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.4455
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.61",
+            "shap": -0.3751
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.1365
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.0721
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0545
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9956,
+      "expected_dollar_churn": 13.44,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (61%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 26); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 567). Factors pulling risk down: largest invoice amount (value 49.00); most recent invoice amount (value 49.00); customer tenure (value 191).",
+      "briefing": {
+        "churn_probability": 0.9956,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "26",
+            "shap": 2.3005
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.5924
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "567",
+            "shap": 0.5799
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "1,225.00",
+            "shap": 0.2962
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.2025
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.1106
+          },
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "191",
+            "shap": -0.1084
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0542
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 1.0,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (61%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9956,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (61%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.4% (with=100%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0044,
+      "expected_dollar_churn_delta": 16.58,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.4% (with=100%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 26,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "lqPSqKe82ruz6JSN",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.6862,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 28 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **69%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 30.51,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 30.51,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 29); days since last invoice (value 374); number of billing events (value 29). Factors pulling risk down: billing-interval confidence (value 0.69); customer tenure (value 399); largest invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "29",
+            "shap": 2.8153
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "374",
+            "shap": 0.9469
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "29",
+            "shap": 0.4584
+          },
+          {
+            "feature": "mean_amount",
+            "label": "average invoice amount",
+            "value": "49.00",
+            "shap": 0.4355
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.69",
+            "shap": -0.3393
+          },
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "399",
+            "shap": -0.2813
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.1388
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.1255
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9956,
+      "expected_dollar_churn": 10.57,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 29); days since last invoice (value 374); billing regularity (value 1.02). Factors pulling risk down: customer tenure (value 399); lifetime revenue (value 1,421.00); largest invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 0.9956,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "29",
+            "shap": 2.6027
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "374",
+            "shap": 0.7882
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "1.02",
+            "shap": 0.7695
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "29",
+            "shap": 0.322
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "399",
+            "shap": -0.5213
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "1,421.00",
+            "shap": -0.117
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.0891
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "0",
+            "shap": -0.0781
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9956,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by -0.1% (with=99%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": -0.0008,
+      "expected_dollar_churn_delta": 19.94,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by -0.1% (with=99%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 29,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "k5x3RKmrDEcrCQuy",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.5724,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 13 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **57%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 2.49,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 2.49,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); days since last invoice (value 649); revenue trend (recent vs prior year) (value 0.00). Factors pulling risk down: billing-interval confidence (value 0.57); most recent invoice amount (value 49.00); largest invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.7457
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "649",
+            "shap": 0.7473
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.64
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "14",
+            "shap": 0.4826
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.57",
+            "shap": -0.3432
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.1625
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.1052
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "686.00",
+            "shap": -0.0702
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9927,
+      "expected_dollar_churn": 4.65,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 649). Factors pulling risk down: most recent invoice amount (value 49.00); largest invoice amount (value 49.00); revenue in the last 12 months (value 0.00).",
+      "briefing": {
+        "churn_probability": 0.9927,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.825
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.6811
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "649",
+            "shap": 0.5728
+          },
+          {
+            "feature": "mean_amount",
+            "label": "average invoice amount",
+            "value": "49.00",
+            "shap": 0.2776
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.307
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.191
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0976
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "588.00",
+            "shap": -0.071
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9927,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0021,
+      "expected_dollar_churn_delta": -2.16,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 14,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "VwwjsRpBjzpemQkD",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "mixed",
+    "interval_confidence": 0.2913,
+    "interval_reason": "We inferred **mixed cadence (more than one regular billing pattern)** because invoice gaps cluster around more than one calendar period (for example a monthly subscription plus an annual fee) \u2014 the strongest pattern is monthly (about 67% of matched gaps) Confidence in this label is **29%**.",
+    "recommendation": "Review",
+    "reason": "low_interval_confidence",
+    "detail": "interval_confidence 0.29 < 0.50; insufficient billing history to auto-decide (data-quality guardrail).",
+    "auto_decided": false,
+    "churn_probability": 1.0,
+    "expected_dollar_churn": 3591.93,
+    "decision_reason": "We recommended **Review** (trained WITH inferred-interval features) because the billing-cycle signal is too uncertain (confidence 29% for \u201cmixed cadence (more than one regular billing pattern)\u201d). Thin or ambiguous history is treated as a data-quality issue \u2014 we do not auto Continue or auto No-Go until the cycle is clearer.",
+    "with_interval": {
+      "recommendation": "Review",
+      "reason": "low_interval_confidence",
+      "detail": "interval_confidence 0.29 < 0.50; insufficient billing history to auto-decide (data-quality guardrail).",
+      "auto_decided": false,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 3591.93,
+      "decision_reason": "We recommended **Review** (trained WITH inferred-interval features) because the billing-cycle signal is too uncertain (confidence 29% for \u201cmixed cadence (more than one regular billing pattern)\u201d). Thin or ambiguous history is treated as a data-quality issue \u2014 we do not auto Continue or auto No-Go until the cycle is clearer.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **revenue in the last 12 months**, which is currently **raising** churn risk. Factors pushing risk up: revenue in the last 12 months (value 3,480.00); total invoice lines (value 13); lifetime revenue (value 4,177.00). Factors pulling risk down: billing-interval confidence (value 0.29); competing cadences (value 2); flag: irregular cadence (value no).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "past12_amount",
+          "label": "revenue in the last 12 months",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "3,480.00",
+            "shap": 2.0769
+          },
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "13",
+            "shap": 1.0638
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "4,177.00",
+            "shap": 0.7891
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "2.52",
+            "shap": 0.5946
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.29",
+            "shap": -0.0801
+          },
+          {
+            "feature": "n_distinct_bases",
+            "label": "competing cadences",
+            "value": "2",
+            "shap": -0.0162
+          },
+          {
+            "feature": "is_irregular",
+            "label": "flag: irregular cadence",
+            "value": "no",
+            "shap": -0.0049
+          },
+          {
+            "feature": "is_quarterly",
+            "label": "flag: quarterly cadence",
+            "value": "no",
+            "shap": -0.0044
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "Review",
+      "reason": "low_interval_confidence",
+      "detail": "interval_confidence 0.29 < 0.50; insufficient billing history to auto-decide (data-quality guardrail).",
+      "auto_decided": false,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 3653.21,
+      "decision_reason": "We recommended **Review** (trained WITHOUT inferred-interval features) because the billing-cycle signal is too uncertain (confidence 29% for \u201cmixed cadence (more than one regular billing pattern)\u201d). Thin or ambiguous history is treated as a data-quality issue \u2014 we do not auto Continue or auto No-Go until the cycle is clearer.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **revenue in the last 12 months**, which is currently **raising** churn risk. Factors pushing risk up: revenue in the last 12 months (value 3,480.00); total invoice lines (value 13); billing regularity (value 2.52). Factors pulling risk down: customer tenure (value 507).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "past12_amount",
+          "label": "revenue in the last 12 months",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "3,480.00",
+            "shap": 2.2661
+          },
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "13",
+            "shap": 1.1504
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "2.52",
+            "shap": 1.019
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "5.00",
+            "shap": 0.9166
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "507",
+            "shap": -0.2705
+          }
+        ]
+      }
+    },
+    "with_recommendation": "Review",
+    "with_p_churn": 1.0,
+    "with_decision_reason": "We recommended **Review** (trained WITH inferred-interval features) because the billing-cycle signal is too uncertain (confidence 29% for \u201cmixed cadence (more than one regular billing pattern)\u201d). Thin or ambiguous history is treated as a data-quality issue \u2014 we do not auto Continue or auto No-Go until the cycle is clearer.",
+    "without_recommendation": "Review",
+    "without_p_churn": 1.0,
+    "without_decision_reason": "We recommended **Review** (trained WITHOUT inferred-interval features) because the billing-cycle signal is too uncertain (confidence 29% for \u201cmixed cadence (more than one regular billing pattern)\u201d). Thin or ambiguous history is treated as a data-quality issue \u2014 we do not auto Continue or auto No-Go until the cycle is clearer.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **Review**. Adding the inferred interval changed churn probability by +0.0% (with=100%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0,
+      "expected_dollar_churn_delta": -61.29,
+      "narrative": "Both models agree on **Review**. Adding the inferred interval changed churn probability by +0.0% (with=100%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 13,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "QwIPFHjXUlH7AzRR",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.6344,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 30 days, which matches monthly billing (about every month) across 13 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **63%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 2.37,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 2.37,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 483). Factors pulling risk down: billing-interval confidence (value 0.63); most recent invoice amount (value 49.00); revenue in the prior 12 months (value 637.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.5689
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.9039
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "483",
+            "shap": 0.8648
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "14",
+            "shap": 0.5215
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.63",
+            "shap": -0.3049
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.2305
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "637.00",
+            "shap": -0.1902
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.0937
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9927,
+      "expected_dollar_churn": 0.0,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); days since last invoice (value 483); revenue trend (recent vs prior year) (value 0.00). Factors pulling risk down: most recent invoice amount (value 49.00); typical days between invoices (value 30); revenue in the prior 12 months (value 637.00).",
+      "briefing": {
+        "churn_probability": 0.9927,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.462
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "483",
+            "shap": 1.0324
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.6956
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "0.66",
+            "shap": 0.559
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.3581
+          },
+          {
+            "feature": "median_gap_days",
+            "label": "typical days between invoices",
+            "value": "30",
+            "shap": -0.2123
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "637.00",
+            "shap": -0.1223
+          },
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "275",
+            "shap": -0.0965
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9927,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0021,
+      "expected_dollar_churn_delta": 2.37,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 14,
+    "median_gap_days": 30.0
+  },
+  {
+    "customer_id": "ZKqukMSyssgcLGsb",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "quarterly",
+    "interval_confidence": 0.6321,
+    "interval_reason": "We inferred **quarterly billing (about every 3 months)** because the typical gap between billing days is about 1 days, which matches quarterly billing (about every 3 months) across 12 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **63%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 1.0,
+    "expected_dollar_churn": 2063.35,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 2063.35,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 13); billing regularity (value 3.36); revenue in the last 12 months (value 1,044.00). Factors pulling risk down: largest invoice amount (value 696.00); billing-interval confidence (value 0.63); most recent invoice amount (value 348.00).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "13",
+            "shap": 1.2406
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "3.36",
+            "shap": 1.1608
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "1,044.00",
+            "shap": 1.0427
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "8,004.00",
+            "shap": 0.8937
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "696.00",
+            "shap": -0.3977
+          },
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.63",
+            "shap": -0.2684
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "348.00",
+            "shap": -0.039
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "0.00",
+            "shap": -0.0376
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9956,
+      "expected_dollar_churn": 2693.45,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **billing regularity**, which is currently **raising** churn risk. Factors pushing risk up: billing regularity (value 3.36); total invoice lines (value 13); revenue in the last 12 months (value 1,044.00). Factors pulling risk down: largest invoice amount (value 696.00); most recent invoice amount (value 348.00); billing events in the last 12 months (value 3).",
+      "briefing": {
+        "churn_probability": 0.9956,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "gap_cv",
+          "label": "billing regularity",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "3.36",
+            "shap": 1.356
+          },
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "13",
+            "shap": 1.2485
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "1,044.00",
+            "shap": 1.0698
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "8,004.00",
+            "shap": 0.7178
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "696.00",
+            "shap": -0.2486
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "348.00",
+            "shap": -0.1597
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "3",
+            "shap": -0.0851
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "n/a",
+            "shap": -0.0571
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 1.0,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9956,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.4% (with=100%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0044,
+      "expected_dollar_churn_delta": -630.1,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.4% (with=100%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 13,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "OWSfpNqqKTsfViQ0",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.5579,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 12 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **56%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 8.49,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (56%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 8.49,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (56%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 13); days since last invoice (value 679); average invoice amount (value 49.00). Factors pulling risk down: billing-interval confidence (value 0.56); most recent invoice amount (value 49.00); lifetime revenue (value 637.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "13",
+            "shap": 1.7549
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "679",
+            "shap": 0.6713
+          },
+          {
+            "feature": "mean_amount",
+            "label": "average invoice amount",
+            "value": "49.00",
+            "shap": 0.4973
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "13",
+            "shap": 0.4801
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.56",
+            "shap": -0.459
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.1732
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "637.00",
+            "shap": -0.1044
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.0947
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9927,
+      "expected_dollar_churn": 5.14,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (56%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 13); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 679). Factors pulling risk down: most recent invoice amount (value 49.00); largest invoice amount (value 49.00); revenue in the last 12 months (value 0.00).",
+      "briefing": {
+        "churn_probability": 0.9927,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "13",
+            "shap": 1.7729
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.637
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "679",
+            "shap": 0.5102
+          },
+          {
+            "feature": "mean_amount",
+            "label": "average invoice amount",
+            "value": "49.00",
+            "shap": 0.2907
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.3949
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.172
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0976
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "0",
+            "shap": -0.0645
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (56%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9927,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (56%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0021,
+      "expected_dollar_churn_delta": 3.35,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 13,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "LRWftCU3gJL0OM1c",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.5994,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 27 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **60%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 33.02,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 33.02,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 28); days since last invoice (value 618); average invoice amount (value 49.00). Factors pulling risk down: billing-interval confidence (value 0.60); largest invoice amount (value 49.00); most recent invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "28",
+            "shap": 2.8934
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "618",
+            "shap": 0.8594
+          },
+          {
+            "feature": "mean_amount",
+            "label": "average invoice amount",
+            "value": "49.00",
+            "shap": 0.4503
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "28",
+            "shap": 0.406
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.60",
+            "shap": -0.3581
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.2446
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.0831
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0508
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9927,
+      "expected_dollar_churn": 4.44,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 28); days since last invoice (value 618); revenue trend (recent vs prior year) (value 0.00). Factors pulling risk down: billing regularity (value 1.78); largest invoice amount (value 49.00); most recent invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 0.9927,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "28",
+            "shap": 2.6979
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "618",
+            "shap": 0.5246
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.4549
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "28",
+            "shap": 0.2839
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "1.78",
+            "shap": -0.2915
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.1911
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.1166
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "0",
+            "shap": -0.0821
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9927,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0021,
+      "expected_dollar_churn_delta": 28.58,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 28,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "hC62LUJeIccWJJzq",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "annual",
+    "interval_confidence": 0.5693,
+    "interval_reason": "We inferred **annual billing (about once a year)** because the typical gap between billing days is about 1 days, which matches annual billing (about once a year) across 20 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **57%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 1.0,
+    "expected_dollar_churn": 1745.22,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 1745.22,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **revenue in the last 12 months**, which is currently **raising** churn risk. Factors pushing risk up: revenue in the last 12 months (value 1,392.00); total invoice lines (value 21); billing regularity (value 4.15). Factors pulling risk down: billing-interval confidence (value 0.57); customer tenure (value 392); billing events in the last 12 months (value 4).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "past12_amount",
+          "label": "revenue in the last 12 months",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "1,392.00",
+            "shap": 1.8859
+          },
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "21",
+            "shap": 1.4314
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "4.15",
+            "shap": 0.9014
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "362",
+            "shap": 0.888
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.57",
+            "shap": -0.4337
+          },
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "392",
+            "shap": -0.302
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "4",
+            "shap": -0.1021
+          },
+          {
+            "feature": "amount_cv",
+            "label": "invoice-amount variability",
+            "value": "0.74",
+            "shap": -0.0909
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 2548.3,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **revenue in the last 12 months**, which is currently **raising** churn risk. Factors pushing risk up: revenue in the last 12 months (value 1,392.00); total invoice lines (value 21); billing regularity (value 4.15). Factors pulling risk down: customer tenure (value 392); invoice-amount variability (value 0.74); billing events in the last 12 months (value 4).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "past12_amount",
+          "label": "revenue in the last 12 months",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "1,392.00",
+            "shap": 1.7942
+          },
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "21",
+            "shap": 1.1297
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "4.15",
+            "shap": 1.1067
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "2,088.00",
+            "shap": 0.8313
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "392",
+            "shap": -0.7672
+          },
+          {
+            "feature": "amount_cv",
+            "label": "invoice-amount variability",
+            "value": "0.74",
+            "shap": -0.1276
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "4",
+            "shap": -0.1103
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "348.00",
+            "shap": -0.0315
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 1.0,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 1.0,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.0% (with=100%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0,
+      "expected_dollar_churn_delta": -803.08,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.0% (with=100%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 21,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "AsjiD97K8QyIPNXc",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.587,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 14 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **59%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 4.92,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 4.92,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 15); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 618). Factors pulling risk down: billing-interval confidence (value 0.59); most recent invoice amount (value 49.00); lifetime revenue (value 735.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "15",
+            "shap": 1.7281
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.7065
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "618",
+            "shap": 0.7056
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "15",
+            "shap": 0.4991
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.59",
+            "shap": -0.3064
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.2164
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "735.00",
+            "shap": -0.0739
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.0585
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9927,
+      "expected_dollar_churn": 4.88,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 15); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 618). Factors pulling risk down: most recent invoice amount (value 49.00); revenue in the prior 12 months (value 637.00); billing events in the last 12 months (value 0).",
+      "briefing": {
+        "churn_probability": 0.9927,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "15",
+            "shap": 1.6962
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.667
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "618",
+            "shap": 0.619
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "1.27",
+            "shap": 0.4717
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.3278
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "637.00",
+            "shap": -0.089
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "0",
+            "shap": -0.0708
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0696
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9927,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0021,
+      "expected_dollar_churn_delta": 0.05,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 15,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "hXGn4BrCZyrI3pxB",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.5724,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 13 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **57%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 2.49,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 2.49,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); days since last invoice (value 642); revenue trend (recent vs prior year) (value 0.00). Factors pulling risk down: billing-interval confidence (value 0.57); most recent invoice amount (value 49.00); largest invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.7457
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "642",
+            "shap": 0.7473
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.64
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "14",
+            "shap": 0.4826
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.57",
+            "shap": -0.3432
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.1625
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.1052
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "686.00",
+            "shap": -0.0702
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9927,
+      "expected_dollar_churn": 4.65,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 642). Factors pulling risk down: most recent invoice amount (value 49.00); largest invoice amount (value 49.00); revenue in the last 12 months (value 0.00).",
+      "briefing": {
+        "churn_probability": 0.9927,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.825
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.6811
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "642",
+            "shap": 0.5728
+          },
+          {
+            "feature": "mean_amount",
+            "label": "average invoice amount",
+            "value": "49.00",
+            "shap": 0.2776
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.307
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.191
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0976
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "588.00",
+            "shap": -0.071
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9927,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (57%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0021,
+      "expected_dollar_churn_delta": -2.16,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 14,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "n2ne0u6oXlVLAkm5",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.6012,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 13 days, which matches monthly billing (about every month) across 13 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **60%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 75.55,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 75.55,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); days since last invoice (value 572); revenue trend (recent vs prior year) (value 0.00). Factors pulling risk down: billing-interval confidence (value 0.60); most recent invoice amount (value 147.00); largest invoice amount (value 147.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.55
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "572",
+            "shap": 0.7661
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.5766
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "0.96",
+            "shap": 0.5702
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.60",
+            "shap": -0.3757
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "147.00",
+            "shap": -0.262
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "147.00",
+            "shap": -0.1765
+          },
+          {
+            "feature": "median_gap_days",
+            "label": "typical days between invoices",
+            "value": "13",
+            "shap": -0.1297
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9956,
+      "expected_dollar_churn": 34.49,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 14); billing regularity (value 0.96); days since last invoice (value 572). Factors pulling risk down: most recent invoice amount (value 147.00); typical days between invoices (value 13); largest invoice amount (value 147.00).",
+      "briefing": {
+        "churn_probability": 0.9956,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "14",
+            "shap": 1.6218
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "0.96",
+            "shap": 0.9528
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "572",
+            "shap": 0.7254
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.5567
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "147.00",
+            "shap": -0.3011
+          },
+          {
+            "feature": "median_gap_days",
+            "label": "typical days between invoices",
+            "value": "13",
+            "shap": -0.1486
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "147.00",
+            "shap": -0.1179
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "0",
+            "shap": -0.0333
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9956,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (60%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by -0.1% (with=99%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": -0.0008,
+      "expected_dollar_churn_delta": 41.06,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by -0.1% (with=99%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 14,
+    "median_gap_days": 13.0
+  },
+  {
+    "customer_id": "xlUqhCrP5CrlTzn0",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.587,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 14 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **59%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 4.92,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 4.92,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 15); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 618). Factors pulling risk down: billing-interval confidence (value 0.59); most recent invoice amount (value 49.00); lifetime revenue (value 735.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "15",
+            "shap": 1.7281
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.7065
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "618",
+            "shap": 0.7056
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "15",
+            "shap": 0.4991
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.59",
+            "shap": -0.3064
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.2164
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "735.00",
+            "shap": -0.0739
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.0585
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9927,
+      "expected_dollar_churn": 4.88,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 15); revenue trend (recent vs prior year) (value 0.00); days since last invoice (value 618). Factors pulling risk down: most recent invoice amount (value 49.00); revenue in the prior 12 months (value 637.00); billing events in the last 12 months (value 0).",
+      "briefing": {
+        "churn_probability": 0.9927,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "15",
+            "shap": 1.6962
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.667
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "618",
+            "shap": 0.619
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "1.27",
+            "shap": 0.4717
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.3278
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "637.00",
+            "shap": -0.089
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "0",
+            "shap": -0.0708
+          },
+          {
+            "feature": "past12_amount",
+            "label": "revenue in the last 12 months",
+            "value": "0.00",
+            "shap": -0.0696
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9927,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (59%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0021,
+      "expected_dollar_churn_delta": 0.05,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.2% (with=99%, without=99%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 15,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "qgrDmgNvDtURUPDD",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.6293,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 1 days, which matches monthly billing (about every month) across 17 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **63%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 0.9948,
+    "expected_dollar_churn": 10.44,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 0.99 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9948,
+      "expected_dollar_churn": 10.44,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 18); days since last invoice (value 526); revenue trend (recent vs prior year) (value 0.00). Factors pulling risk down: billing-interval confidence (value 0.63); most recent invoice amount (value 49.00); largest invoice amount (value 49.00).",
+      "briefing": {
+        "churn_probability": 0.9948,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "18",
+            "shap": 1.7816
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "526",
+            "shap": 0.8172
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.6457
+          },
+          {
+            "feature": "median_gap_days",
+            "label": "typical days between invoices",
+            "value": "1",
+            "shap": 0.4742
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.63",
+            "shap": -0.2693
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.2498
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.0785
+          },
+          {
+            "feature": "dominant_share",
+            "label": "dominant-cadence share",
+            "value": "1.00",
+            "shap": -0.0338
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 0.9956,
+      "expected_dollar_churn": 5.45,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 18); days since last invoice (value 526); billing regularity (value 1.02). Factors pulling risk down: most recent invoice amount (value 49.00); revenue in the prior 12 months (value 784.00); billing events in the last 12 months (value 0).",
+      "briefing": {
+        "churn_probability": 0.9956,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 0.99)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "18",
+            "shap": 1.6351
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "526",
+            "shap": 0.8147
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "1.02",
+            "shap": 0.7312
+          },
+          {
+            "feature": "revenue_trend",
+            "label": "revenue trend (recent vs prior year)",
+            "value": "0.00",
+            "shap": 0.6486
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.2869
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "784.00",
+            "shap": -0.1335
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "0",
+            "shap": -0.0828
+          },
+          {
+            "feature": "total_amount",
+            "label": "lifetime revenue",
+            "value": "882.00",
+            "shap": -0.0751
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 0.9948,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **99%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 0.9956,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (63%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by -0.1% (with=99%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": -0.0008,
+      "expected_dollar_churn_delta": 4.99,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by -0.1% (with=99%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 18,
+    "median_gap_days": 1.0
+  },
+  {
+    "customer_id": "7IMDlQBsCGZvKMdz",
+    "snapshot": "2025-03-05",
+    "inferred_interval": "monthly",
+    "interval_confidence": 0.6857,
+    "interval_reason": "We inferred **monthly billing (about every month)** because the typical gap between billing days is about 30 days, which matches monthly billing (about every month) across 27 observed cycle(s) (about 100% of gaps fit that pattern) and spacing looks somewhat uneven Confidence in this label is **69%**.",
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+    "auto_decided": true,
+    "churn_probability": 1.0,
+    "expected_dollar_churn": 636.17,
+    "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "with_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 636.17,
+      "decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 28); days since last invoice (value 263); number of billing events (value 28). Factors pulling risk down: billing-interval confidence (value 0.69); most recent invoice amount (value 49.00); revenue in the prior 12 months (value 686.00).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "28",
+            "shap": 2.4701
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "263",
+            "shap": 2.0461
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "28",
+            "shap": 0.7897
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "0.80",
+            "shap": 0.4058
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "interval_confidence",
+            "label": "billing-interval confidence",
+            "value": "0.69",
+            "shap": -0.3796
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.2949
+          },
+          {
+            "feature": "prior12_amount",
+            "label": "revenue in the prior 12 months",
+            "value": "686.00",
+            "shap": -0.2935
+          },
+          {
+            "feature": "n_events_past12",
+            "label": "billing events in the last 12 months",
+            "value": "13",
+            "shap": -0.2181
+          }
+        ]
+      }
+    },
+    "without_interval": {
+      "recommendation": "No-Go",
+      "reason": "high_churn_risk",
+      "detail": "churn_prob 1.00 vs Continue<= 0.45, No-Go>= 0.70.",
+      "auto_decided": true,
+      "churn_probability": 1.0,
+      "expected_dollar_churn": 629.7,
+      "decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+      "model_drivers": "Overall risk tier: **High risk**. The single biggest driver is **total invoice lines**, which is currently **raising** churn risk. Factors pushing risk up: total invoice lines (value 28); days since last invoice (value 263); number of billing events (value 28). Factors pulling risk down: customer tenure (value 495); most recent invoice amount (value 49.00); typical days between invoices (value 30).",
+      "briefing": {
+        "churn_probability": 1.0,
+        "tier": "High risk",
+        "confidence": "High (|p-0.5| margin 1.00)",
+        "main_reason": {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "direction": "increasing"
+        },
+        "risk_increasing": [
+          {
+            "feature": "n_invoices_total",
+            "label": "total invoice lines",
+            "value": "28",
+            "shap": 2.7045
+          },
+          {
+            "feature": "recency_days",
+            "label": "days since last invoice",
+            "value": "263",
+            "shap": 2.0846
+          },
+          {
+            "feature": "n_events",
+            "label": "number of billing events",
+            "value": "28",
+            "shap": 0.5825
+          },
+          {
+            "feature": "gap_cv",
+            "label": "billing regularity",
+            "value": "0.80",
+            "shap": 0.5606
+          }
+        ],
+        "risk_decreasing": [
+          {
+            "feature": "tenure_days",
+            "label": "customer tenure",
+            "value": "495",
+            "shap": -0.2681
+          },
+          {
+            "feature": "last_amount",
+            "label": "most recent invoice amount",
+            "value": "49.00",
+            "shap": -0.2417
+          },
+          {
+            "feature": "median_gap_days",
+            "label": "typical days between invoices",
+            "value": "30",
+            "shap": -0.1263
+          },
+          {
+            "feature": "max_amount",
+            "label": "largest invoice amount",
+            "value": "49.00",
+            "shap": -0.0689
+          }
+        ]
+      }
+    },
+    "with_recommendation": "No-Go",
+    "with_p_churn": 1.0,
+    "with_decision_reason": "Using the model **trained WITH inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "without_recommendation": "No-Go",
+    "without_p_churn": 1.0,
+    "without_decision_reason": "Using the model **trained WITHOUT inferred-interval features**, predicted chance of dollar churn is **100%** (high risk). That sits above the No-Go threshold, and interval confidence (69%) is high enough to auto-decide, so the recommendation is **No-Go** \u2014 decline or escalate for credit risk.",
+    "recommendations_agree": true,
+    "comparison_narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.0% (with=100%, without=100%).",
+    "comparison": {
+      "recommendations_agree": true,
+      "churn_probability_delta": 0.0,
+      "expected_dollar_churn_delta": 6.47,
+      "narrative": "Both models agree on **No-Go**. Adding the inferred interval changed churn probability by +0.0% (with=100%, without=100%)."
+    },
+    "model_version": "20260712_032913",
+    "n_events": 28,
+    "median_gap_days": 30.0
+  }
+]

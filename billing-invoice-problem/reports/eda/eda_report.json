@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-07-12T14:09:42.432680+00:00",
+  "raw": {
+    "source": "D:\\Personal\\DS\\ds-assignment\\billing-invoice-problem\\ds-assignment\\billing-invoice-problem\\data\\raw\\Invoices_users.parquet",
+    "columns": [
+      "id",
+      "account",
+      "accountid",
+      "customerid",
+      "amount",
+      "date"
+    ],
+    "n_rows": 22083629,
+    "n_customers": 562851,
+    "n_accounts": 1,
+    "customer_id_is_unique": true,
+    "missingness": {
+      "null_customer_rate": 0.0,
+      "null_date_rate": 0.0,
+      "null_amount_rate": 0.0,
+      "non_positive_amount_rate": 0.0
+    },
+    "date_range": {
+      "min": "2023-01-09 00:00:00",
+      "max": "2026-04-05 00:00:00"
+    },
+    "amount": {
+      "min": 0.95,
+      "p50": 1.0,
+      "p75": 1.0,
+      "p95": 1.0,
+      "p99": 348.0,
+      "mean": 10.773526551274768,
+      "max": 11880.0
+    },
+    "same_day": {
+      "n_customer_days": 845464,
+      "multi_invoice_day_rate": 0.1719,
+      "n_multi_invoice_days": 145304,
+      "max_invoices_on_one_day": 9387
+    },
+    "invoices_per_customer": {
+      "share_single_invoice": 0.6201,
+      "p50": 1.0,
+      "p75": 2.0,
+      "p95": 123.0,
+      "mean": 39.2353020604032,
+      "max": 9387
+    }
+  },
+  "events": {
+    "source": "D:\\Personal\\DS\\ds-assignment\\billing-invoice-problem\\ds-assignment\\billing-invoice-problem\\data\\processed\\billing_events.parquet",
+    "n_events": 845464,
+    "n_customers": 562851,
+    "event_amount": {
+      "mean": 281.4059065554521,
+      "p50": 1.0,
+      "max": 1476888.0,
+      "mean_invoices_per_event": 26.12012930177985
+    },
+    "events_per_customer": {
+      "share_single_event": 0.7605,
+      "share_recurring_ge2": 0.2395,
+      "p50": 1.0,
+      "p75": 1.0,
+      "p95": 3.0,
+      "max": 144
+    },
+    "gaps_days": {
+      "n_gaps": 282613,
+      "p25": 2.0,
+      "p50": 8.0,
+      "p75": 31.0,
+      "p90": 365.0,
+      "mean": 69.82910198752357
+    },
+    "collapse_ratio": 0.9617
+  },
+  "findings": [
+    {
+      "severity": "info",
+      "area": "missingness",
+      "message": "No nulls or non-positive amounts in customerid/date/amount \u2014 imputation is unnecessary; the real missing field is billing interval."
+    },
+    {
+      "severity": "critical",
+      "area": "same_day_aggregation",
+      "message": "17.2% of customer-days have >1 invoice (max 9387 on one day) \u2014 same-day aggregation is required before gap/interval logic."
+    },
+    {
+      "severity": "critical",
+      "area": "history_depth",
+      "message": "62.0% of customers have a single invoice (p50=1.0, p75=2.0, max=9387) \u2014 split insufficient_history vs one_time_candidate; do not blanket one_time."
+    },
+    {
+      "severity": "warn",
+      "area": "amount_skew",
+      "message": "Amounts are right-skewed (median=1.0, mean=10.77, max=11880.0) \u2014 use log1p / robust summaries for monetary features."
+    },
+    {
+      "severity": "info",
+      "area": "gap_shape",
+      "message": "Inter-event gaps: n=282613, p50=8.0d, p75=31.0d, p90=365.0d \u2014 match to calendar multiples (30/91/182/365) allowing skipped periods."
+    },
+    {
+      "severity": "info",
+      "area": "recurring_share",
+      "message": "After aggregation, 23.9% of customers have >=2 billing events (interval inference has a gap signal); 76.0% remain single-event."
+    },
+    {
+      "severity": "info",
+      "area": "modeling_implication",
+      "message": "Validate inferred intervals indirectly via temporally held-out ablation on dollar-churn (no ground-truth interval column exists)."
+    }
+  ],
+  "figures": [
+    "reports\\eda\\figures\\amount_quantiles.png",
+    "reports\\eda\\figures\\invoices_per_customer.png",
+    "reports\\eda\\figures\\gap_histogram.png"
+  ]
+}

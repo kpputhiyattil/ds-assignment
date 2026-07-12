@@ -31,6 +31,9 @@ mlruns/
 # Keep raw data tracked? Large parquet — ignore by default, track via DVC/LFS if desired.
 data/raw/*.parquet
 
+# Generated report figures (markdown/json under reports/ are kept)
+reports/eda/figures/
+
 # OS / editor
 .DS_Store
 Thumbs.db
