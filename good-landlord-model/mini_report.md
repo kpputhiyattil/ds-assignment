@@ -1,8 +1,19 @@
 # Mini Report — Landlord Quality Scoring
 
-_Generated at: 2026-07-11T12:52:59.866002+00:00_
+_Generated at: 2026-07-12T20:30:33.200635+00:00_
 
 Executive summary of the good-vs-bad landlord pipeline: company success targets → OOF company baseline residuals → EB-shrunk `AdjustedScore` → landlord models (GroupKFold) → SHAP.
+
+## Business question & how to use the score
+
+**Question:** *Is it worth for a business or shop to rent space from a given landlord?* The pipeline answers this with a single quality signal per landlord plus the reasons behind it, so a prospective tenant can compare options.
+
+- **Score** — `AdjustedScore` (known landlords) or `PredictedScore` (new / unseen landlords). Higher = tenants under this landlord tend to *outperform* what their own profile predicts, i.e. the landlord adds value beyond location and tenant mix.
+- **QualityBand** — `good` (≥70th percentile), `bad` (≤30th percentile), else `neutral`. Use the band for a quick shortlist; use `PercentileRank` to rank finalists.
+- **ConfidenceLevel** — `high` (≥10 tenants), `medium` (≥5), else `low`. Scores for landlords with few tenants are pulled toward the market average (Empirical-Bayes shrinkage, m=10); a `low` confidence `neutral` often just means *not enough evidence yet*, not *average*.
+- **Drivers** — `TopPositive/NegativeDrivers` (local SHAP) tell the tenant *why*: e.g. strong tenant client base and healthy budgets raise a score.
+
+**Suggested decision rule:** prefer `good` + `high`/`medium` confidence; treat `bad` + `high` confidence as a real red flag; for `low` confidence, weight the SHAP drivers and do independent due diligence rather than trusting the band.
 
 ## Setup & reproducibility
 
@@ -68,6 +79,15 @@ Full narratives and waterfalls: `reports/shap_explainability_report.md`.
 - Survivorship / incomplete `AllCompanyID` coverage (~30% bridge IDs absent from Companies).
 - Single snapshot; small-N landlords are heavily EB-shrunk — treat low-tenant scores cautiously.
 - SHAP explains model predictions, not true causal drivers.
+
+## What I'd improve given more time
+
+- **Causal framing** — move beyond association with a temporal / difference-in-differences design (tenant outcomes before vs after moving under a landlord) or matching on tenant profile + location to reduce selection confounding.
+- **Recover the missing ~30%** — investigate the unmatched `AllCompanyID` bridge rows; if they are failed/churned tenants, their absence biases scores upward (survivorship). Quantify and correct for it.
+- **Uncertainty per landlord** — publish a confidence interval / posterior for each score (e.g. quantile or Bayesian models) instead of a point estimate plus a coarse confidence band.
+- **Location disentanglement** — add explicit geographic controls so the score reflects the *landlord*, not just a good catchment area.
+- **Temporal validation & monitoring** — backtest on a time-split, then track drift on the served model (the FastAPI scorer already exposes the hooks).
+- **Target robustness** — the success target is a weighted composite; co-design the weights with domain stakeholders and expand the sensitivity sweep beyond the current min-Spearman check.
 
 ## Artifact index
 

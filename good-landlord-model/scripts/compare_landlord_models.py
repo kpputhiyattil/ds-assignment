@@ -1,18 +1,17 @@
 """
-compare_landlord_models.py — train landlord models, compare metrics, recommend best.
+compare_landlord_models.py — compare trained models, recommend best.
 
-Uses existing processed feature matrix when available; otherwise builds the
-pipeline (targets → OOF baseline → AdjustedScore → features).
+Reads the comparison CSV and eval summary already produced by
+``run_landlord_models.py`` and adds:
+  - model_comparison_recommendation.json  (best-model pick + rationale)
+  - model_comparison_report.md            (human-readable markdown)
 
-Outputs
--------
-  reports/landlord_model_comparison.csv
-  reports/model_comparison_report.md
-  reports/model_comparison_recommendation.json
+If the comparison CSV does not exist yet, falls back to training
+all models from scratch (same as run_landlord_models).
 
 Usage (from project root, venv active):
     python scripts/compare_landlord_models.py
-    python scripts/compare_landlord_models.py --rebuild   # force rebuild matrix
+    python scripts/compare_landlord_models.py --retrain   # force retrain all models
 """
 from __future__ import annotations
 
@@ -29,116 +28,118 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from src.config import cfg
-from src.data.ingestion import build_model_base, load_companies, load_landlords
-from src.features.transforms import build_feature_matrix, get_feature_cols
-from src.models.company_baseline import build_landlord_adjusted_scores
 from src.models.evaluate import (
-    compare_models,
     render_model_comparison_report,
     suggest_best_model,
 )
-from src.models.train import ALL_MODEL_TYPES, train_all
-from src.targets.construction import build_targets
 from src.utils.reproducibility import repo_relpath, set_seed
 
 logger = logging.getLogger(__name__)
 
 
-def _attach_targets(model_base: pd.DataFrame, companies_scored: pd.DataFrame) -> pd.DataFrame:
-    target_cols = [
-        c for c in ("CompanyID", "CompanyIsActive", "SuccessScore", "SuccessScoreRank")
-        if c in companies_scored.columns
-    ]
-    drop_existing = [c for c in target_cols if c != "CompanyID" and c in model_base.columns]
-    base = model_base.drop(columns=drop_existing, errors="ignore")
-    return base.merge(companies_scored[target_cols], on="CompanyID", how="left")
+def _train_and_compare() -> tuple[pd.DataFrame, str, int]:
+    """Full training fallback when cached artifacts are missing."""
+    from src.data.ingestion import build_model_base, load_companies, load_landlords
+    from src.features.transforms import build_feature_matrix, get_feature_cols
+    from src.models.company_baseline import build_landlord_adjusted_scores
+    from src.models.evaluate import compare_models
+    from src.models.train import ALL_MODEL_TYPES, train_all
+    from src.targets.construction import build_targets
 
-
-def _load_or_build_matrix(*, rebuild: bool) -> tuple[pd.DataFrame, str]:
     processed = Path(cfg["paths"]["processed_dir"])
-    matrix_path = processed / "landlord_feature_matrix.parquet"
+    processed.mkdir(parents=True, exist_ok=True)
+
     feature_set = "with_portfolio"
     fs_cfg = cfg.get("landlord_model", {}).get("feature_sets", {})
     if fs_cfg.get("with_portfolio") is False:
         feature_set = "landlord_only"
 
-    if matrix_path.exists() and not rebuild:
-        logger.info("Loading feature matrix from %s", matrix_path)
-        return pd.read_parquet(matrix_path), feature_set
-
-    logger.info("Building feature matrix from raw data …")
-    landlords = load_landlords()
-    companies = load_companies()
-    bridge, model_base = build_model_base(landlords, companies)
-
-    targets_path = processed / "company_targets.parquet"
-    if targets_path.exists() and not rebuild:
-        companies_scored = pd.read_parquet(targets_path)
+    matrix_path = processed / "landlord_feature_matrix.parquet"
+    if matrix_path.exists():
+        matrix = pd.read_parquet(matrix_path)
     else:
-        companies_scored = build_targets(companies, cfg=cfg)
-        processed.mkdir(parents=True, exist_ok=True)
-        companies_scored.to_parquet(targets_path, index=False)
+        landlords = load_landlords()
+        companies = load_companies()
+        bridge, model_base = build_model_base(landlords, companies)
+        targets_path = processed / "company_targets.parquet"
+        if targets_path.exists():
+            companies_scored = pd.read_parquet(targets_path)
+        else:
+            companies_scored = build_targets(companies, cfg=cfg)
+            companies_scored.to_parquet(targets_path, index=False)
+        target_cols = [
+            c for c in ("CompanyID", "CompanyIsActive", "SuccessScore", "SuccessScoreRank")
+            if c in companies_scored.columns
+        ]
+        model_base = model_base.merge(
+            companies_scored[target_cols], on="CompanyID", how="left"
+        )
+        model_base_oof, landlord_scores = build_landlord_adjusted_scores(
+            model_base, bridge, cfg=cfg
+        )
+        matrix = build_feature_matrix(
+            landlords, model_base_oof, landlord_scores, cfg=cfg, feature_set=feature_set
+        )
+        matrix.to_parquet(matrix_path, index=False)
 
-    model_base = _attach_targets(model_base, companies_scored)
-    model_base_oof, landlord_scores = build_landlord_adjusted_scores(
-        model_base, bridge, cfg=cfg
-    )
-    matrix = build_feature_matrix(
-        landlords, model_base_oof, landlord_scores, cfg=cfg, feature_set=feature_set
-    )
-    processed.mkdir(parents=True, exist_ok=True)
-    matrix.to_parquet(matrix_path, index=False)
-    landlord_scores.to_parquet(processed / "landlord_adjusted_scores.parquet", index=False)
-    return matrix, feature_set
-
-
-def main(argv: list[str] | None = None) -> Path:
-    parser = argparse.ArgumentParser(description="Compare landlord regression models")
-    parser.add_argument(
-        "--rebuild",
-        action="store_true",
-        help="Rebuild targets / OOF scores / feature matrix even if cached",
-    )
-    parser.add_argument(
-        "--models",
-        nargs="+",
-        default=list(ALL_MODEL_TYPES),
-        choices=list(ALL_MODEL_TYPES),
-        help="Subset of models to train (default: all)",
-    )
-    args = parser.parse_args(argv)
-
-    seed = set_seed(int(cfg.get("seed", 42)))
-    reports = Path(cfg["paths"]["reports_dir"])
-    reports.mkdir(parents=True, exist_ok=True)
-    logger.info("Reproducibility seed=%d", seed)
-
-    matrix, feature_set = _load_or_build_matrix(rebuild=args.rebuild)
     numeric_cols, categorical_cols = get_feature_cols(matrix, feature_set=feature_set)
-
-    logger.info(
-        "Training %s on %d landlords (%d num + %d cat features)",
-        args.models, len(matrix), len(numeric_cols), len(categorical_cols),
-    )
     results = train_all(
         matrix,
         numeric_cols=numeric_cols,
         categorical_cols=categorical_cols,
         cfg=cfg,
-        model_types=args.models,
+        model_types=list(ALL_MODEL_TYPES),
     )
-
     comparison = compare_models(results)
-    suggestion = suggest_best_model(comparison)
+    return comparison, feature_set, len(matrix)
+
+
+def main(argv: list[str] | None = None) -> Path:
+    parser = argparse.ArgumentParser(description="Compare landlord regression models")
+    parser.add_argument(
+        "--retrain",
+        action="store_true",
+        help="Force retrain all models instead of reading cached comparison",
+    )
+    args = parser.parse_args(argv)
+
+    seed = set_seed(int(cfg.get("seed", 42)))
+    reports = Path(cfg["paths"]["reports_dir"])
+    processed = Path(cfg["paths"]["processed_dir"])
+    reports.mkdir(parents=True, exist_ok=True)
+    logger.info("Reproducibility seed=%d", seed)
 
     csv_path = reports / "landlord_model_comparison.csv"
-    comparison.to_csv(csv_path, index=False)
+    feature_set = "with_portfolio"
+    fs_cfg = cfg.get("landlord_model", {}).get("feature_sets", {})
+    if fs_cfg.get("with_portfolio") is False:
+        feature_set = "landlord_only"
 
-    n_folds = int(comparison["n_folds"].iloc[0]) if len(comparison) else None
+    if csv_path.exists() and not args.retrain:
+        logger.info("Reading existing comparison from %s (skip retraining)", csv_path)
+        comparison = pd.read_csv(csv_path)
+        matrix_path = processed / "landlord_feature_matrix.parquet"
+        if matrix_path.exists():
+            n_landlords = len(pd.read_parquet(matrix_path, columns=["LandLordID"]))
+        elif "n_landlords" in comparison.columns and len(comparison):
+            n_landlords = int(comparison["n_landlords"].iloc[0])
+        else:
+            n_landlords = None
+    else:
+        if args.retrain:
+            logger.info("--retrain flag set, training all models …")
+        else:
+            logger.info("No cached comparison found, training all models …")
+        comparison, feature_set, n_landlords = _train_and_compare()
+        comparison.to_csv(csv_path, index=False)
+
+    suggestion = suggest_best_model(comparison)
+
+    n_folds = int(comparison["n_folds"].iloc[0]) if len(comparison) and "n_folds" in comparison.columns else None
     md = render_model_comparison_report(
         comparison,
         suggestion,
-        n_landlords=len(matrix),
+        n_landlords=n_landlords,
         n_folds=n_folds,
         feature_set=feature_set,
         extra_notes=[
