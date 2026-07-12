@@ -1,17 +1,11 @@
 """
-run_assessment.py — build the written mini-report from pipeline artifacts.
+run_assessment.py — build the single mini-report from pipeline artifacts.
 
-Must run **after** train / ablation / explain (and preferably after EDA).
-It does not train models; it reads existing artifacts and writes the graded
-narrative (with-vs-without interval comparison from ``ablation_report.json``).
+Writes ``reports/assessment/mini_report.md`` (approach, with-vs-without summary,
+ablation tables, SHAP, improvements). Run **after** train / ablation / explain.
 
-Runs on actual-data artifacts already produced by the pipeline (ingestion,
-interval, features, ablation, SHAP) plus optional EDA output.
-
-Usage (from project root, venv active):
+Usage:
     python -m src.scripts.run_assessment
-    # or:
-    python -m src.reporting.assessment
     make assess
 """
 from __future__ import annotations
@@ -29,7 +23,12 @@ from src.reporting.assessment import collect_artifacts, write_assessment_report 
 
 def main() -> Path:
     arts = collect_artifacts()
-    missing = [k for k, v in arts.items() if v is None and k != "eda"]
+    missing = [
+        k
+        for k, v in arts.items()
+        if v is None
+        and k not in ("eda", "package_manifest", "batch_summary", "train_metadata")
+    ]
     if arts.get("eda") is None:
         print("Note: EDA report missing — run `make eda` first for richer narrative.")
     if missing:
@@ -39,7 +38,7 @@ def main() -> Path:
         )
     path = write_assessment_report()
     print("\n" + "=" * 60)
-    print("ASSESSMENT MINI-REPORT")
+    print("MINI-REPORT (single file to send)")
     print("=" * 60)
     print(f"Markdown: {path}")
     print("Copy:     data/artifacts/mini_report.md")
