@@ -100,6 +100,18 @@ class Settings(BaseSettings):
     """Path to Companies.parquet. Resolved relative to CWD at runtime."""
 
     # ------------------------------------------------------------------
+    # Batch assessment
+    # ------------------------------------------------------------------
+    batch_size: str = "150"
+    """
+    How many companies to assess when running ``scripts/batch_assess.py``
+    without ``--limit``. Accepted values:
+    - ``full`` / ``all`` — every company in the dataset
+    - a positive integer string — e.g. ``50``, ``150``
+    CLI ``--limit`` always overrides this setting.
+    """
+
+    # ------------------------------------------------------------------
     # Validators
     # ------------------------------------------------------------------
 
@@ -107,6 +119,27 @@ class Settings(BaseSettings):
     @classmethod
     def normalise_provider(cls, v: str) -> str:
         return v.strip().lower()
+
+    @field_validator("batch_size", mode="before")
+    @classmethod
+    def normalise_batch_size(cls, v: object) -> str:
+        return str(v).strip().lower()
+
+    @field_validator("batch_size")
+    @classmethod
+    def validate_batch_size(cls, v: str) -> str:
+        if v in {"full", "all"}:
+            return v
+        try:
+            n = int(v)
+        except ValueError as exc:
+            raise ValueError(
+                f"BATCH_SIZE='{v}' is not valid. "
+                "Use 'full', 'all', or a positive integer (e.g. 50, 150)."
+            ) from exc
+        if n <= 0:
+            raise ValueError(f"BATCH_SIZE must be a positive integer, got {n}")
+        return str(n)
 
     @field_validator("llm_temperature")
     @classmethod
@@ -136,8 +169,14 @@ class Settings(BaseSettings):
         return self
 
     # ------------------------------------------------------------------
-    # Convenience properties
+    # Convenience properties / helpers
     # ------------------------------------------------------------------
+
+    def resolve_batch_limit(self, total: int) -> int:
+        """Map BATCH_SIZE to a concrete company count for a dataset of size ``total``."""
+        if self.batch_size in {"full", "all"}:
+            return total
+        return int(self.batch_size)
 
     @property
     def langfuse_enabled(self) -> bool:

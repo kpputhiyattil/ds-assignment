@@ -3,19 +3,19 @@ Batch-assess companies and group by recommendation (Continue / Review / No-Go).
 
 Usage
 -----
-  # First 150 companies (default)
+  # Size from .env BATCH_SIZE (full | 50 | 150 | …)
   python scripts/batch_assess.py
 
-  # Custom count / start index
-  python scripts/batch_assess.py --limit 150 --offset 0
+  # Override .env for this run
+  python scripts/batch_assess.py --limit 50 --offset 0
 
   # Write detailed JSON results
-  python scripts/batch_assess.py --limit 150 --out outputs/batch_150.json
+  python scripts/batch_assess.py --out outputs/batch_report.json
 
 Notes
 -----
-Each assessment calls the configured LLM (see .env). 150 runs can take
-15–60+ minutes depending on the model and network.
+Each assessment calls the configured LLM (see .env). Set BATCH_SIZE in .env
+to control how many companies are assessed when --limit is omitted.
 """
 
 from __future__ import annotations
@@ -53,7 +53,12 @@ logger = logging.getLogger("batch_assess")
 
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Batch credit assessment grouped by verdict")
-    p.add_argument("--limit", type=int, default=150, help="Number of companies to assess")
+    p.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Number of companies to assess (overrides BATCH_SIZE from .env)",
+    )
     p.add_argument("--offset", type=int, default=0, help="Skip this many IDs from the sorted list")
     p.add_argument(
         "--ids",
@@ -90,12 +95,24 @@ def main() -> int:
     loader = DataLoader(data_path)
     all_ids = loader.list_company_ids()
 
+    batch_label = settings.batch_size
+    limit = args.limit
+
     if args.demo_three:
         selected = ["COMPANY_0088", "COMPANY_0001", "COMPANY_0093"]
+        batch_label = "demo-three"
+        limit = len(selected)
     elif args.ids:
         selected = [x.strip() for x in args.ids.split(",") if x.strip()]
+        batch_label = "ids"
+        limit = len(selected)
     else:
-        selected = all_ids[args.offset : args.offset + args.limit]
+        if limit is None:
+            limit = settings.resolve_batch_limit(len(all_ids))
+            batch_label = settings.batch_size
+        else:
+            batch_label = str(limit)
+        selected = all_ids[args.offset : args.offset + limit]
 
     missing = [cid for cid in selected if cid not in set(all_ids)]
     if missing:
@@ -103,14 +120,21 @@ def main() -> int:
         return 1
 
     if not selected:
-        logger.error("No companies selected (offset=%s limit=%s total=%s)", args.offset, args.limit, len(all_ids))
+        logger.error(
+            "No companies selected (offset=%s limit=%s batch_size=%s total=%s)",
+            args.offset,
+            limit,
+            settings.batch_size,
+            len(all_ids),
+        )
         return 1
 
     logger.info(
-        "Batch start — provider=%s model=%s companies=%d (offset=%d)",
+        "Batch start — provider=%s model=%s companies=%d batch_size=%s offset=%d",
         settings.llm_provider,
         settings.llm_model,
         len(selected),
+        batch_label,
         args.offset,
     )
 
@@ -205,8 +229,9 @@ def main() -> int:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "provider": settings.llm_provider,
         "model": settings.llm_model,
+        "batch_size": batch_label,
         "offset": args.offset,
-        "limit": args.limit,
+        "limit": limit,
         "assessed": len(selected),
         "elapsed_seconds": round(total_s, 1),
         "counts": {label: len(ids_by_rec.get(label, [])) for label in order},
@@ -225,7 +250,8 @@ def main() -> int:
         out_dir = ROOT / "outputs"
         out_dir.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        out_path = out_dir / f"batch_{args.limit}_{stamp}.json"
+        safe_label = str(batch_label).replace("/", "-").replace(" ", "_")
+        out_path = out_dir / f"batch_{safe_label}_{stamp}.json"
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
