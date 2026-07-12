@@ -121,7 +121,8 @@ with st.sidebar:
 # ── Main area: two tabs ─────────────────────────────────────────────────────
 tab_upload, tab_manual = st.tabs(["Upload file", "Enter details"])
 
-scored_payload: dict | None = None
+if "scored_payload" not in st.session_state:
+    st.session_state.scored_payload = None
 
 with tab_upload:
     st.markdown(
@@ -138,7 +139,7 @@ with tab_upload:
         with st.spinner("Scoring with SHAP explanations…"):
             files = {"file": (uploaded.name, uploaded.getvalue())}
             data = {"top_k": str(top_k)}
-            scored_payload = _api("/api/score/file", method="POST", files=files, data=data)
+            st.session_state.scored_payload = _api("/api/score/file", method="POST", files=files, data=data)
 
 with tab_manual:
     st.markdown("Enter a single landlord's features.")
@@ -181,31 +182,32 @@ with tab_manual:
             st.warning("Enter at least some feature values.")
         else:
             with st.spinner("Scoring…"):
-                scored_payload = _api(
+                st.session_state.scored_payload = _api(
                     "/api/score/json",
                     method="POST",
                     json={"landlords": [record], "top_k": top_k},
                 )
 
 # ── Results ──────────────────────────────────────────────────────────────────
-if scored_payload:
+if st.session_state.scored_payload:
     st.divider()
-    results = scored_payload.get("results", [])
+    payload = st.session_state.scored_payload
+    results = payload.get("results", [])
 
-    pipe_note = scored_payload.get("pipeline_note")
-    input_warn = scored_payload.get("input_warning")
+    pipe_note = payload.get("pipeline_note")
+    input_warn = payload.get("input_warning")
     if pipe_note:
         st.info(pipe_note)
     if input_warn:
         st.warning(input_warn)
 
-    trunc = scored_payload.get("truncated", False)
-    n_in = scored_payload.get("n_input", 0)
-    n_out = scored_payload.get("n_scored", 0)
+    trunc = payload.get("truncated", False)
+    n_in = payload.get("n_input", 0)
+    n_out = payload.get("n_scored", 0)
     st.caption(
         f"Scored **{n_out}** of {n_in} row(s)"
-        + (f" (truncated to {scored_payload.get('max_rows')})" if trunc else "")
-        + f" · {scored_payload.get('model_type', '')} {scored_payload.get('model_version', '')}"
+        + (f" (truncated to {payload.get('max_rows')})" if trunc else "")
+        + f" · {payload.get('model_type', '')} {payload.get('model_version', '')}"
     )
 
     if not results:
@@ -235,15 +237,29 @@ if scored_payload:
         if band_opt != "All":
             view = view[view["QualityBand"].str.lower() == band_opt.lower()]
 
-        st.dataframe(view, use_container_width=True, hide_index=True)
+        st.caption("Click a row to inspect that landlord's score details.")
+        event = st.dataframe(
+            view,
+            use_container_width=True,
+            hide_index=True,
+            selection_mode="single-row",
+            on_select="rerun",
+            key="results_table",
+        )
 
-        # Detail panel
-        ids = [r.get("LandLordID", f"ROW_{i}") for i, r in enumerate(results)]
-        filtered_ids = view["LandLordID"].tolist() if not view.empty else ids
-        selected = st.selectbox("Inspect landlord", filtered_ids, key="detail_select")
+        # Resolve which row was clicked
+        selected_rows = event.selection.rows if event and event.selection else []
+        if selected_rows:
+            sel_idx = selected_rows[0]
+            selected_id = view.iloc[sel_idx]["LandLordID"] if sel_idx < len(view) else None
+        elif not view.empty:
+            selected_id = view.iloc[0]["LandLordID"]
+        else:
+            selected_id = None
 
-        row = next((r for r in results if r.get("LandLordID") == selected), None)
+        row = next((r for r in results if r.get("LandLordID") == selected_id), None) if selected_id else None
         if row:
+            st.divider()
             band = row.get("QualityBand", "unknown")
             score = row.get("PredictedScore", 0)
             qual = row.get("PredictedQualityScore", 0)
@@ -278,7 +294,7 @@ if scored_payload:
                         for s in neg_signals:
                             st.markdown(f"- {s}")
 
-            with st.expander("SHAP drivers"):
+            with st.expander("SHAP drivers", expanded=True):
                 dc1, dc2 = st.columns(2)
                 with dc1:
                     st.markdown("##### Features pushing score up")
