@@ -57,6 +57,13 @@ def build_mini_report() -> str:
         pd.read_csv(importance_path) if importance_path.exists() else pd.DataFrame()
     )
 
+    land_cfg = cfg.get("landlord_score", {})
+    top_pct = land_cfg.get("top_percentile", 70)
+    bottom_pct = land_cfg.get("bottom_percentile", 30)
+    conf_high = land_cfg.get("confidence_high_threshold", 10)
+    conf_med = land_cfg.get("confidence_medium_threshold", 5)
+    shrink_m = land_cfg.get("shrinkage_m", 10)
+
     best = recommendation.get("best_model") or "n/a"
     reason = recommendation.get("reason", "")
     n_landlords = eval_summary.get("n_landlords") or recommendation.get("best_row", {}).get(
@@ -73,6 +80,43 @@ def build_mini_report() -> str:
         "Executive summary of the good-vs-bad landlord pipeline: "
         "company success targets → OOF company baseline residuals → "
         "EB-shrunk `AdjustedScore` → landlord models (GroupKFold) → SHAP."
+    )
+    lines.append("")
+
+    lines.append("## Business question & how to use the score")
+    lines.append("")
+    lines.append(
+        "**Question:** *Is it worth for a business or shop to rent space from a given "
+        "landlord?* The pipeline answers this with a single quality signal per landlord "
+        "plus the reasons behind it, so a prospective tenant can compare options."
+    )
+    lines.append("")
+    lines.append(
+        "- **Score** — `AdjustedScore` (known landlords) or `PredictedScore` (new / "
+        "unseen landlords). Higher = tenants under this landlord tend to *outperform* "
+        "what their own profile predicts, i.e. the landlord adds value beyond location "
+        "and tenant mix."
+    )
+    lines.append(
+        f"- **QualityBand** — `good` (≥{top_pct}th percentile), `bad` "
+        f"(≤{bottom_pct}th percentile), else `neutral`. Use the band for a quick "
+        "shortlist; use `PercentileRank` to rank finalists."
+    )
+    lines.append(
+        f"- **ConfidenceLevel** — `high` (≥{conf_high} tenants), `medium` "
+        f"(≥{conf_med}), else `low`. Scores for landlords with few tenants are pulled "
+        f"toward the market average (Empirical-Bayes shrinkage, m={shrink_m}); a `low` "
+        "confidence `neutral` often just means *not enough evidence yet*, not *average*."
+    )
+    lines.append(
+        "- **Drivers** — `TopPositive/NegativeDrivers` (local SHAP) tell the tenant "
+        "*why*: e.g. strong tenant client base and healthy budgets raise a score."
+    )
+    lines.append("")
+    lines.append(
+        f"**Suggested decision rule:** prefer `good` + `high`/`medium` confidence; treat "
+        f"`bad` + `high` confidence as a real red flag; for `low` confidence, weight the "
+        "SHAP drivers and do independent due diligence rather than trusting the band."
     )
     lines.append("")
 
@@ -210,6 +254,39 @@ def build_mini_report() -> str:
     )
     lines.append(
         "- SHAP explains model predictions, not true causal drivers."
+    )
+    lines.append("")
+
+    lines.append("## What I'd improve given more time")
+    lines.append("")
+    lines.append(
+        "- **Causal framing** — move beyond association with a temporal / "
+        "difference-in-differences design (tenant outcomes before vs after moving "
+        "under a landlord) or matching on tenant profile + location to reduce "
+        "selection confounding."
+    )
+    lines.append(
+        "- **Recover the missing ~30%** — investigate the unmatched `AllCompanyID` "
+        "bridge rows; if they are failed/churned tenants, their absence biases scores "
+        "upward (survivorship). Quantify and correct for it."
+    )
+    lines.append(
+        "- **Uncertainty per landlord** — publish a confidence interval / posterior "
+        "for each score (e.g. quantile or Bayesian models) instead of a point estimate "
+        "plus a coarse confidence band."
+    )
+    lines.append(
+        "- **Location disentanglement** — add explicit geographic controls so the "
+        "score reflects the *landlord*, not just a good catchment area."
+    )
+    lines.append(
+        "- **Temporal validation & monitoring** — backtest on a time-split, then track "
+        "drift on the served model (the FastAPI scorer already exposes the hooks)."
+    )
+    lines.append(
+        "- **Target robustness** — the success target is a weighted composite; "
+        "co-design the weights with domain stakeholders and expand the "
+        "sensitivity sweep beyond the current min-Spearman check."
     )
     lines.append("")
 
