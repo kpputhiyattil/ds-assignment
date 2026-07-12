@@ -223,8 +223,8 @@ data/raw/
 data/processed/
 data/artifacts/
 
-# Generated reports (figures are reproduced by the pipeline)
-reports/figures/
+# Generated reports (reproduced by the pipeline)
+reports/
 
 # Model artifacts
 *.cbm

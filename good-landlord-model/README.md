@@ -139,7 +139,7 @@ python -m src.data.validation           # data quality → data/processed/data_q
 python scripts/run_eda.py               # EDA → reports/eda_report.{json,md}
 python scripts/run_company_targets.py   # targets → data/processed/company_targets.parquet
 python scripts/run_landlord_models.py   # baseline + FE + train + eval → models + reports
-python scripts/compare_landlord_models.py   # best-model pick → reports/model_comparison_*
+python scripts/compare_landlord_models.py   # best-model pick → reports/model_comparison_* (reads cached, no retrain)
 python scripts/run_shap_explainability.py   # SHAP → reports/shap_*, figures/shap/
 python scripts/export_landlord_scorer.py    # packaged artifact → data/artifacts/landlord_scorer.joblib
 python scripts/write_mini_report.py         # executive summary → reports/mini_report.md
