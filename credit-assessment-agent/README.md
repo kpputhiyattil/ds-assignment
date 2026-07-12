@@ -20,7 +20,7 @@ Mini report: [`MINI_REPORT.md`](./MINI_REPORT.md).
 ## Tech stack
 
 Python 3.12 · pandas / pyarrow · LangGraph ReAct · langchain-openai · Streamlit ·
-Langfuse (optional) · pydantic-settings · pytest.
+Langfuse (optional) · pydantic-settings.
 
 ## Project layout
 
@@ -30,7 +30,6 @@ agent/                         # DataLoader, tools, guardrails, ReAct agent, EDA
 app/streamlit_app.py           # Analyst UI
 scripts/run_eda.py             # EDA CLI                         (FIRST)
 scripts/batch_assess.py        # Batch / demo assessments
-tests/                         # Tools, guardrails, integration
 reports/eda/                   # Generated EDA (JSON + Markdown)
 outputs/                       # Batch JSON + ID lists
 data/{raw,processed,artifacts} # raw = input; artifacts = generated
@@ -51,8 +50,6 @@ pip install -e ".[dev]"
 Copy-Item .env.example .env   # Windows
 # cp .env.example .env        # macOS / Linux
 # Edit .env — set OPENAI_API_KEY (or LLM_BASE_URL) and DATA_PATH
-
-pytest
 ```
 
 Requires **Python ≥ 3.12**. Always use the **venv** interpreter for streamlit
@@ -77,7 +74,6 @@ Put the parquet at `data/raw/Companies.parquet`, activate the venv, then either:
 
 ```bash
 make eda
-make test
 make run
 ```
 
@@ -87,19 +83,16 @@ or run each stage (Windows-friendly; same order):
 # 1) EDA BEFORE agent / batch (design + guardrail evidence)
 python scripts/run_eda.py
 
-# 2) Tests
-pytest tests/ -v
-
-# 3) Interactive UI
-streamlit run app/streamlit_app.py
-
-# 4) Batch assessment (size from .env BATCH_SIZE)
+# 2) Batch assessment (size from .env BATCH_SIZE)
 python scripts/batch_assess.py
 # or demos:
 python scripts/batch_assess.py --demo-three
+
+# 3) Interactive UI
+streamlit run app/streamlit_app.py
 ```
 
-**Order note:** `run_eda` belongs **before** Streamlit / batch. It documents
+**Order note:** `run_eda` belongs **before** batch / Streamlit. It documents
 missingness, status mixes, and budget-utilisation cutoffs that justify the
 10% burn guardrail. Batch assessment needs a live LLM (`OPENAI_API_KEY` or
 compatible endpoint).
@@ -119,7 +112,6 @@ streamlit run app/streamlit_app.py
 | Check | Expected |
 |---|---|
 | EDA | `reports/eda/eda_report.md` + `eda_report.json` |
-| Tests | `pytest tests/ -v` passes |
 | UI | `http://localhost:8501` — select company → Run Assessment |
 | Demo CLI | `python scripts/batch_assess.py --demo-three` → 3 verdicts |
 | Guardrail | Assess `COMPANY_0093` → banner / `guardrail_fired` |
@@ -131,11 +123,9 @@ Stages are built incrementally. Once set up, the full run is:
 
 ```bash
 make eda          # FIRST — company EDA (missingness, status, util cuts) -> reports/eda/
-make test         # unit + integration tests
-make run          # Streamlit UI
-# then optionally:
 python scripts/batch_assess.py          # uses BATCH_SIZE from .env
 python scripts/batch_assess.py --demo-three
+make run          # Streamlit UI
 ```
 
 **Order note:** `make eda` belongs **before** assessment (design / data
