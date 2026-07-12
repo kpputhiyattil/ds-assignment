@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-07-12T14:09:48.015514+00:00",
+  "sources_present": {
+    "eda": true,
+    "ingestion": true,
+    "interval": true,
+    "features": true,
+    "ablation": true,
+    "shap": true
+  },
+  "interval_good_enough": true,
+  "decision": "SHIP the inferred interval as a substitute for the missing real interval",
+  "report_path": "D:\\Personal\\DS\\ds-assignment\\billing-invoice-problem\\ds-assignment\\billing-invoice-problem\\reports\\assessment\\mini_report.md"
+}

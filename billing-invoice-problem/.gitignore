@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# ML artifacts & intermediate data (keep raw inputs, ignore generated)
+data/processed/*
+data/artifacts/*
+!data/processed/.gitkeep
+!data/artifacts/.gitkeep
+mlruns/
+*.pkl
+*.joblib
+*.txt.model
+
+# Keep raw data tracked? Large parquet — ignore by default, track via DVC/LFS if desired.
+data/raw/*.parquet
+
+# Generated report figures (markdown/json under reports/ are kept)
+reports/eda/figures/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

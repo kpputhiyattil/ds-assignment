@@ -1,0 +1,93 @@
+# =============================================================================
+# Central configuration — never hardcode these in code.
+# Loaded and validated by src/config.py (pydantic-settings).
+# Any value can be overridden by an environment variable of the same name
+# (uppercased), e.g. RANDOM_SEED=7 python -m src.data.ingestion
+# =============================================================================
+
+# --- Paths (relative to project root) ---
+paths:
+  data_dir: "data"
+  raw_invoices: "data/raw/Invoices_users.parquet"
+  processed_dir: "data/processed"
+  artifacts_dir: "data/artifacts"
+  billing_events: "data/processed/billing_events.parquet"
+
+# --- Reproducibility ---
+random_seed: 42
+
+# --- Schema (raw invoice columns; loader asserts these exist) ---
+schema:
+  customer_id_col: "customerid"
+  account_id_col: "accountid"
+  amount_col: "amount"
+  date_col: "date"
+
+# --- Interval inference ---
+interval:
+  # Canonical billing-cycle base periods in days. Gaps are matched to the
+  # nearest MULTIPLE of a base so a skipped period (e.g. 60 ~ 2x30) still
+  # counts as monthly.
+  base_periods_days:
+    monthly: 30
+    quarterly: 91
+    semi_annual: 182
+    annual: 365
+  # Relative tolerance when matching a gap to a multiple of a base period.
+  match_tolerance: 0.15
+  # A single invoice with silence >= this many days before the snapshot is a
+  # one_time_candidate; more recent single invoices are insufficient_history.
+  one_time_horizon_days: 400
+  # Gap coefficient-of-variation above this => 'irregular'.
+  max_gap_cv: 0.5
+  # With >=2 competing base periods, dominant share below this => "mixed".
+  mixed_dominant_share_max: 0.8
+
+# --- Dollar-churn label ---
+churn:
+  outcome_window_days: 365     # 12-month outcome window
+  grace_days: 30               # buffer so late annual invoices aren't miscounted
+  # Customer churns if future-window revenue drops below this fraction of the
+  # past-window revenue.
+  drop_threshold: 0.5
+
+# --- Temporal validation snapshots (train on earlier, test on later) ---
+snapshots:
+  - "2024-10-05"
+  - "2025-03-05"
+
+# --- Model (LightGBM; shared defaults, tuned per stage in later steps) ---
+model:
+  frequency:                   # Model 1: P(churn) classifier
+    objective: "binary"
+    n_estimators: 400
+    learning_rate: 0.05
+    num_leaves: 63
+    subsample: 0.8
+    colsample_bytree: 0.8
+  severity:                    # Model 2: E(loss | churn) regressor
+    objective: "regression_l1" # MAE-aligned, robust to skew
+    n_estimators: 400
+    learning_rate: 0.05
+    num_leaves: 63
+    subsample: 0.8
+    colsample_bytree: 0.8
+
+# --- Decision layer thresholds (expected dollar churn -> recommendation) ---
+decision:
+  # Loosened Continue band so healthy accounts with solid interval confidence
+  # can auto-clear (sensitivity on the 500-customer sample: Cont<=0.30 → 0%,
+  # Cont<=0.45 → a few %, Cont<=0.50 → ~4%).
+  continue_max_risk: 0.45
+  nogo_min_risk: 0.70
+  # Low interval confidence routes to Review (data-quality), never auto No-Go.
+  min_interval_confidence_for_auto: 0.50
+
+# --- Serving / interactive load guards (API + Streamlit) ---
+# Interactive uploads never load the full 22M-row file unless an offline job
+# explicitly passes allow_full / --full.
+serving:
+  default_max_customers: 500
+  hard_max_customers: 5000
+  max_upload_mb: 128
+  max_invoice_rows: 2000000

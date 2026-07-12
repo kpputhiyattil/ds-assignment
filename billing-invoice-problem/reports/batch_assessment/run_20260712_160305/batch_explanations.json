@@ -1,0 +1,152 @@
+[
+  {
+    "customer_id": "ZKqukMSyssgcLGsb",
+    "snapshot": "2025-03-05",
+    "churn_probability": 1.0,
+    "expected_dollar_churn": 2063.35,
+    "inferred_interval": "quarterly",
+    "interval_confidence": 0.6321,
+    "recommendation": "No-Go",
+    "reason": "high_churn_risk",
+    "detail": "churn_prob 1.00 vs Continue<= 0.30, No-Go>= 0.70.",
+    "auto_decided": true,
+    "model_version": "20260712_032913",
+    "briefing": {
+      "churn_probability": 1.0,
+      "tier": "High risk",
+      "confidence": "High (|p-0.5| margin 1.00)",
+      "main_reason": {
+        "feature": "n_invoices_total",
+        "label": "total invoice lines",
+        "direction": "increasing"
+      },
+      "risk_increasing": [
+        {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "value": "13",
+          "shap": 1.2406
+        },
+        {
+          "feature": "gap_cv",
+          "label": "billing regularity",
+          "value": "3.36",
+          "shap": 1.1608
+        },
+        {
+          "feature": "past12_amount",
+          "label": "revenue in the last 12 months",
+          "value": "1,044.00",
+          "shap": 1.0427
+        },
+        {
+          "feature": "total_amount",
+          "label": "lifetime revenue",
+          "value": "8,004.00",
+          "shap": 0.8937
+        }
+      ],
+      "risk_decreasing": [
+        {
+          "feature": "max_amount",
+          "label": "largest invoice amount",
+          "value": "696.00",
+          "shap": -0.3977
+        },
+        {
+          "feature": "interval_confidence",
+          "label": "billing-interval confidence",
+          "value": "0.63",
+          "shap": -0.2684
+        },
+        {
+          "feature": "last_amount",
+          "label": "most recent invoice amount",
+          "value": "348.00",
+          "shap": -0.039
+        },
+        {
+          "feature": "prior12_amount",
+          "label": "revenue in the prior 12 months",
+          "value": "0.00",
+          "shap": -0.0376
+        }
+      ]
+    }
+  },
+  {
+    "customer_id": "VwwjsRpBjzpemQkD",
+    "snapshot": "2025-03-05",
+    "churn_probability": 1.0,
+    "expected_dollar_churn": 3591.93,
+    "inferred_interval": "mixed",
+    "interval_confidence": 0.2913,
+    "recommendation": "Review",
+    "reason": "low_interval_confidence",
+    "detail": "interval_confidence 0.29 < 0.50; insufficient billing history to auto-decide (data-quality guardrail).",
+    "auto_decided": false,
+    "model_version": "20260712_032913",
+    "briefing": {
+      "churn_probability": 1.0,
+      "tier": "High risk",
+      "confidence": "High (|p-0.5| margin 1.00)",
+      "main_reason": {
+        "feature": "past12_amount",
+        "label": "revenue in the last 12 months",
+        "direction": "increasing"
+      },
+      "risk_increasing": [
+        {
+          "feature": "past12_amount",
+          "label": "revenue in the last 12 months",
+          "value": "3,480.00",
+          "shap": 2.0769
+        },
+        {
+          "feature": "n_invoices_total",
+          "label": "total invoice lines",
+          "value": "13",
+          "shap": 1.0638
+        },
+        {
+          "feature": "total_amount",
+          "label": "lifetime revenue",
+          "value": "4,177.00",
+          "shap": 0.7891
+        },
+        {
+          "feature": "gap_cv",
+          "label": "billing regularity",
+          "value": "2.52",
+          "shap": 0.5946
+        }
+      ],
+      "risk_decreasing": [
+        {
+          "feature": "interval_confidence",
+          "label": "billing-interval confidence",
+          "value": "0.29",
+          "shap": -0.0801
+        },
+        {
+          "feature": "n_distinct_bases",
+          "label": "competing cadences",
+          "value": "2",
+          "shap": -0.0162
+        },
+        {
+          "feature": "is_irregular",
+          "label": "flag: irregular cadence",
+          "value": "no",
+          "shap": -0.0049
+        },
+        {
+          "feature": "is_quarterly",
+          "label": "flag: quarterly cadence",
+          "value": "no",
+          "shap": -0.0044
+        }
+      ]
+    }
+  }
+]
