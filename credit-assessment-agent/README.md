@@ -1,127 +1,149 @@
 # Credit Assessment Agent
 
-An LLM-powered credit assessment agent that evaluates company applications for growth capital using a ReAct-style agent with deterministic tool calls and hard guardrails.
+An LLM-powered credit assessment agent that evaluates company applications for
+growth capital using a ReAct-style agent with deterministic tool calls and hard
+guardrails. Verdict: **Continue / Review / No-Go**, plus confidence and a
+natural-language rationale.
 
-## Architecture
+Design notes: [`SOLUTION_BLUEPRINT.md`](./SOLUTION_BLUEPRINT.md) ·
+Mini report: [`MINI_REPORT.md`](./MINI_REPORT.md).
+
+## Problem framing
+
+| | |
+|---|---|
+| **Task** | First-pass credit triage from a structured company profile (`Companies.parquet`). |
+| **Signals** | Three deterministic tools: financial health, client engagement, business profile. |
+| **Guardrails** | Hard overrides on non-active status and extreme budget burn (`util < 10%`). |
+| **Delivery** | Streamlit analyst UI + CLI batch assessment + EDA report. |
+
+## Tech stack
+
+Python 3.12 · pandas / pyarrow · LangGraph ReAct · langchain-openai · Streamlit ·
+Langfuse (optional) · pydantic-settings · pytest.
+
+## Project layout
 
 ```
-Streamlit UI / CLI → DataLoader → LangGraph ReAct Agent → [3 Tools] → Guardrail Engine → AssessmentResult
-                                                                        ↓
-                                                               Langfuse (traces)
+configs via .env               # LLM provider, DATA_PATH, BATCH_SIZE
+agent/                         # DataLoader, tools, guardrails, ReAct agent, EDA
+app/streamlit_app.py           # Analyst UI
+scripts/run_eda.py             # EDA CLI                         (FIRST)
+scripts/batch_assess.py        # Batch / demo assessments
+tests/                         # Tools, guardrails, integration
+reports/eda/                   # Generated EDA (JSON + Markdown)
+outputs/                       # Batch JSON + ID lists
+data/{raw,processed,artifacts} # raw = input; artifacts = generated
 ```
 
-The agent calls three deterministic Python tools to compute financial, engagement, and profile signals, then asks the LLM to synthesise a structured verdict. Hard guardrails override the LLM if critical conditions are met.
-
----
-
-## How to run the entire flow
-
-Follow these steps from the project root (`credit-assessment-agent/`).
-
-### 1. Prerequisites
-
-- Python **3.12+**
-- An OpenAI API key (or a local OpenAI-compatible server such as Ollama)
-- `Companies.parquet` under `data/raw/` (already present in this repo layout)
-
-### 2. Create a virtual environment and install dependencies
+## Setup
 
 ```bash
-# Using uv (recommended)
-pip install uv
-uv venv
-# Windows:
-.venv\Scripts\activate
+python -m venv .venv
+# Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
 # macOS / Linux:
 # source .venv/bin/activate
 
-uv pip install -e ".[dev]"
-# Or:
-# pip install -r requirements-dev.txt
+pip install -e ".[dev]"
+# or: pip install -r requirements-dev.txt
+
+Copy-Item .env.example .env   # Windows
+# cp .env.example .env        # macOS / Linux
+# Edit .env — set OPENAI_API_KEY (or LLM_BASE_URL) and DATA_PATH
+
+pytest
 ```
 
-Using Make (if available):
+Requires **Python ≥ 3.12**. Always use the **venv** interpreter for streamlit
+(not a system-wide `python.exe`), so dependencies resolve correctly.
 
-```bash
-make install-dev
-```
+Default data path: `DATA_PATH=./data/raw/Companies.parquet`.
 
-### 3. Configure environment
+## Sharing this project with someone else
 
-```bash
-# Windows (PowerShell)
-Copy-Item .env.example .env
+### What to send
 
-# macOS / Linux
-# cp .env.example .env
-```
-
-Edit `.env` and set at least:
-
-| Variable | Required | Example |
+| Item | Required? | Notes |
 |---|---|---|
-| `LLM_PROVIDER` | Yes | `openai` or `openai_compatible` |
-| `OPENAI_API_KEY` | If using OpenAI | `sk-...` |
-| `LLM_BASE_URL` | If using compatible provider | `http://localhost:11434/v1` |
-| `LLM_MODEL` | No | `gpt-4o-2024-08-06` |
-| `DATA_PATH` | No | `./data/raw/Companies.parquet` |
-| `LANGFUSE_*` | No | Optional tracing |
+| Project code (repo / zip) | Yes | Source, tests, reports, `MINI_REPORT.md` |
+| `data/raw/Companies.parquet` | Yes | **Gitignored** — must share separately |
+| `reports/eda/` | Optional | Skip if they will re-run `make eda` |
+| `outputs/` batch JSON | Optional | Useful demos; regenerate with batch script |
 
-Default data path in `.env.example` points at `./data/raw/Companies.parquet`.
+### Full rebuild (from raw companies)
 
-### 4. Verify the setup (tests)
+Put the parquet at `data/raw/Companies.parquet`, activate the venv, then either:
 
 ```bash
+make eda
+make test
+make run
+```
+
+or run each stage (Windows-friendly; same order):
+
+```bash
+# 1) EDA BEFORE agent / batch (design + guardrail evidence)
+python scripts/run_eda.py
+
+# 2) Tests
 pytest tests/ -v
-# or: make test
-```
 
-Unit tests cover the three tools, guardrails, and agent integration. They do not require a live LLM for most cases.
-
-### 5. Run the interactive end-to-end flow (Streamlit)
-
-```bash
+# 3) Interactive UI
 streamlit run app/streamlit_app.py
-# or: make run
+
+# 4) Batch assessment (size from .env BATCH_SIZE)
+python scripts/batch_assess.py
+# or demos:
+python scripts/batch_assess.py --demo-three
 ```
 
-Then in the browser:
+**Order note:** `run_eda` belongs **before** Streamlit / batch. It documents
+missingness, status mixes, and budget-utilisation cutoffs that justify the
+10% burn guardrail. Batch assessment needs a live LLM (`OPENAI_API_KEY` or
+compatible endpoint).
 
-1. Open the URL Streamlit prints (usually `http://localhost:8501`).
-2. In the **sidebar**, pick a `Company ID` from the dropdown.
-3. Review the **Company Preview** fields.
-4. Click **▶ Run Assessment**.
-5. Wait ~15–30 seconds while the agent:
-   - loads the company row from parquet
-   - calls the three tools (financial health, client engagement, business profile)
-   - asks the LLM for a structured verdict
-   - applies hard guardrails
-6. Inspect the main panel:
-   - **Recommendation** — Continue / Review / No-Go
-   - **Confidence** — low / medium / high
-   - **Rationale** — natural-language explanation
-   - **Guardrail banner** — shown only if a hard rule overrode the LLM
-   - **Tool Outputs** expander — deterministic metrics
-   - **Agent Reasoning Steps** expander — LangGraph / tool-call trace
+### Faster path (EDA already included)
 
-**Suggested demo companies** (pick these IDs in the sidebar):
-
-| CompanyID | Typical path | Guardrail |
-|---|---|---|
-| `COMPANY_0088` | Continue | No |
-| `COMPANY_0015` | Review | No |
-| `COMPANY_0093` | No-Go | Yes — company status hard stop |
-| `COMPANY_0002` | No-Go | Yes — extreme budget burn |
-
-Details and batch evidence: see `MINI_REPORT.md`.
-
-### 6. Run the same flow from the CLI (batch / demos)
-
-Configure how many companies to assess in `.env` (used when `--limit` is omitted):
+If `reports/eda/eda_report.md` is already present:
 
 ```bash
-# .env
-BATCH_SIZE=150    # or 50, or full (every company)
+pip install -e ".[dev]"
+# configure .env
+streamlit run app/streamlit_app.py
+```
+
+### Sanity checks
+
+| Check | Expected |
+|---|---|
+| EDA | `reports/eda/eda_report.md` + `eda_report.json` |
+| Tests | `pytest tests/ -v` passes |
+| UI | `http://localhost:8501` — select company → Run Assessment |
+| Demo CLI | `python scripts/batch_assess.py --demo-three` → 3 verdicts |
+| Guardrail | Assess `COMPANY_0093` → banner / `guardrail_fired` |
+| Batch | `outputs/batch_*_*.json` + `_ids/` folder |
+
+## Pipeline run order
+
+Stages are built incrementally. Once set up, the full run is:
+
+```bash
+make eda          # FIRST — company EDA (missingness, status, util cuts) -> reports/eda/
+make test         # unit + integration tests
+make run          # Streamlit UI
+# then optionally:
+python scripts/batch_assess.py          # uses BATCH_SIZE from .env
+python scripts/batch_assess.py --demo-three
+```
+
+**Order note:** `make eda` belongs **before** assessment (design / data
+understanding / guardrail threshold evidence). Batch size is configured in
+`.env`:
+
+```bash
+BATCH_SIZE=150    # or 50, or full
 ```
 
 | `BATCH_SIZE` | Behaviour |
@@ -130,95 +152,37 @@ BATCH_SIZE=150    # or 50, or full (every company)
 | `150` | First 150 companies |
 | `full` / `all` | Entire dataset |
 
-Then run:
+CLI `--limit` overrides `.env` for a one-off run.
+
+## How to use the Streamlit UI
 
 ```bash
-# Uses BATCH_SIZE from .env
-python scripts/batch_assess.py
-
-# One-off override (does not change .env)
-python scripts/batch_assess.py --limit 50
-python scripts/batch_assess.py --limit 150 --offset 0
+streamlit run app/streamlit_app.py
+# or: make run
 ```
 
-Quick three-company demo (Continue / Review / Guardrail No-Go):
+1. Open the URL Streamlit prints (usually `http://localhost:8501`).
+2. Sidebar → pick a `Company ID`.
+3. Click **▶ Run Assessment** (~15–30s).
+4. Inspect recommendation, confidence, rationale, tool outputs, and any
+   guardrail banner.
 
-```bash
-python scripts/batch_assess.py --demo-three
-```
+**Suggested demo companies:**
 
-Assess a custom list:
-
-```bash
-python scripts/batch_assess.py --ids COMPANY_0088,COMPANY_0015,COMPANY_0093
-```
-
-Optional explicit output path:
-
-```bash
-python scripts/batch_assess.py --out outputs/batch_report.json
-```
-
-Results are written under `outputs/`:
-
-- `batch_<BATCH_SIZE>_<timestamp>.json` — full structured results
-- `batch_<BATCH_SIZE>_<timestamp>_ids/` — `Continue.txt`, `Review.txt`, `No-Go.txt`, `SUMMARY.txt`
-
-### 7. End-to-end checklist
-
-| Step | Command / action | Success signal |
+| CompanyID | Typical path | Guardrail |
 |---|---|---|
-| Install | `uv pip install -e ".[dev]"` | No errors |
-| Configure | `.env` with API key + `DATA_PATH` | Settings load without validation errors |
-| Tests | `pytest tests/ -v` | All tests pass |
-| UI flow | `streamlit run app/streamlit_app.py` → select company → Run | Verdict + tool outputs appear |
-| Demo CLI | `python scripts/batch_assess.py --demo-three` | Three verdicts printed; JSON under `outputs/` |
-| Guardrail | Assess `COMPANY_0093` | Red / warning banner; `guardrail_fired` |
-
----
-
-## Project structure
-
-```
-credit-assessment-agent/
-├── .env.example                    # Environment variable template
-├── .env                            # Actual secrets (gitignored)
-├── pyproject.toml                  # Dependencies
-├── Makefile                        # install / test / run shortcuts
-├── MINI_REPORT.md                  # Guardrails, evaluation, monitoring, improvements
-│
-├── data/raw/
-│   └── Companies.parquet           # Source data
-│
-├── app/
-│   └── streamlit_app.py            # Streamlit UI
-│
-├── agent/
-│   ├── credit_agent.py             # LangGraph ReAct agent
-│   ├── data_loader.py              # Parquet loader
-│   ├── guardrails.py               # Hard rule engine
-│   ├── models.py                   # AssessmentResult + enums
-│   ├── observability.py            # Langfuse setup
-│   ├── prompts.py                  # System prompt
-│   ├── config.py                   # Settings from .env
-│   └── tools/
-│       ├── financial_health.py
-│       ├── client_engagement.py
-│       └── business_profile.py
-│
-├── scripts/
-│   └── batch_assess.py             # CLI batch / demo assessments
-│
-├── outputs/                        # Batch JSON + ID lists
-└── tests/
-```
+| `COMPANY_0088` | Continue | No |
+| `COMPANY_0015` | Review | No |
+| `COMPANY_0093` | No-Go | Yes — company status hard stop |
+| `COMPANY_0002` | No-Go | Yes — extreme budget burn |
 
 ## Guardrails
 
-Two hard rules override the LLM verdict regardless of its reasoning:
-
-1. **Company Status Hard Stop** — any non-active status (`inactive`, `suspended`, `closed`) → `No-Go`
+1. **Company Status Hard Stop** — `inactive` / `suspended` / `closed` → `No-Go`
 2. **Extreme Budget Burn** — revenue covers <10% of monthly budget → `No-Go`
+
+Threshold rationale is regenerated by EDA (`reports/eda/`). Narrative answers
+for the assignment live in `MINI_REPORT.md`.
 
 ## Environment variables
 
@@ -228,11 +192,20 @@ Two hard rules override the LLM verdict regardless of its reasoning:
 | `OPENAI_API_KEY` | When provider is `openai` | OpenAI API key |
 | `LLM_BASE_URL` | When provider is `openai_compatible` | Base URL (e.g. Ollama `/v1`) |
 | `LLM_API_KEY` | No | Key for compatible providers (default `ollama`) |
-| `LLM_MODEL` | No | Model name (default: `gpt-4o-2024-08-06`) |
+| `LLM_MODEL` | No | Default `gpt-4o-2024-08-06` |
 | `LLM_TEMPERATURE` | No | Default `0.0` |
 | `LLM_MAX_TOKENS` | No | Default `8192` |
-| `LANGFUSE_SECRET_KEY` | No | Langfuse secret key for tracing |
-| `LANGFUSE_PUBLIC_KEY` | No | Langfuse public key for tracing |
-| `LANGFUSE_HOST` | No | Default `https://cloud.langfuse.com` |
-| `DATA_PATH` | No | Path to parquet (default `./Companies.parquet`; prefer `./data/raw/Companies.parquet`) |
-| `BATCH_SIZE` | No | Batch report size: `full`, `50`, `150`, or any positive integer (default `150`) |
+| `DATA_PATH` | No | Prefer `./data/raw/Companies.parquet` |
+| `BATCH_SIZE` | No | `full`, `50`, `150`, or any positive integer (default `150`) |
+| `LANGFUSE_*` | No | Optional tracing |
+
+## Build progress
+
+- [x] **Data loader** — parquet load, schema rename, company lookup
+- [x] **EDA** — `scripts/run_eda.py` → `reports/eda/`
+- [x] **Tools** — financial health, client engagement, business profile
+- [x] **Guardrails** — status hard stop + extreme budget burn
+- [x] **Agent** — LangGraph ReAct + Continue calibration
+- [x] **UI** — Streamlit assess flow
+- [x] **Batch** — CLI with `BATCH_SIZE` / `--demo-three`
+- [x] **Mini report** — guardrails, evaluation, monitoring, improvements

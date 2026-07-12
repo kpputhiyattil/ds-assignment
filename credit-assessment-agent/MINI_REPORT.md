@@ -122,6 +122,7 @@ Prioritised gaps before treating this as production-ready:
 
 | Artifact | Path |
 |---|---|
+| EDA (run first) | `reports/eda/eda_report.md` — regenerate with `python scripts/run_eda.py` / `make eda` |
 | Guardrails | `agent/guardrails.py` |
 | Continue calibration | `agent/credit_agent.py` (`_promote_continue_if_eligible`) |
 | System prompt | `agent/prompts.py` |
