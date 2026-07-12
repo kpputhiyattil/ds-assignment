@@ -69,7 +69,8 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument(
         "--demo-three",
         action="store_true",
-        help="Assess the three assignment demos: Continue / Review / Guardrail No-Go",
+        help="Assess demos: Continue / Review / Guardrail No-Go "
+        "(COMPANY_0088, COMPANY_0015, COMPANY_0093)",
     )
     p.add_argument(
         "--out",
@@ -99,7 +100,7 @@ def main() -> int:
     limit = args.limit
 
     if args.demo_three:
-        selected = ["COMPANY_0088", "COMPANY_0001", "COMPANY_0093"]
+        selected = ["COMPANY_0088", "COMPANY_0015", "COMPANY_0093"]
         batch_label = "demo-three"
         limit = len(selected)
     elif args.ids:

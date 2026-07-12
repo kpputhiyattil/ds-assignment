@@ -109,8 +109,11 @@ Then in the browser:
 | CompanyID | Typical path | Guardrail |
 |---|---|---|
 | `COMPANY_0088` | Continue | No |
-| `COMPANY_0001` | Review | No |
+| `COMPANY_0015` | Review | No |
 | `COMPANY_0093` | No-Go | Yes — company status hard stop |
+| `COMPANY_0002` | No-Go | Yes — extreme budget burn |
+
+Details and batch evidence: see `MINI_REPORT.md`.
 
 ### 6. Run the same flow from the CLI (batch / demos)
 
@@ -147,7 +150,7 @@ python scripts/batch_assess.py --demo-three
 Assess a custom list:
 
 ```bash
-python scripts/batch_assess.py --ids COMPANY_0088,COMPANY_0001,COMPANY_0093
+python scripts/batch_assess.py --ids COMPANY_0088,COMPANY_0015,COMPANY_0093
 ```
 
 Optional explicit output path:
@@ -182,7 +185,7 @@ credit-assessment-agent/
 ├── .env                            # Actual secrets (gitignored)
 ├── pyproject.toml                  # Dependencies
 ├── Makefile                        # install / test / run shortcuts
-├── MINI_REPORT.md                  # Design notes & demo IDs
+├── MINI_REPORT.md                  # Guardrails, evaluation, monitoring, improvements
 │
 ├── data/raw/
 │   └── Companies.parquet           # Source data
