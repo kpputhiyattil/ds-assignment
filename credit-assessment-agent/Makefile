@@ -1,4 +1,4 @@
-.PHONY: install install-dev test run lint clean help
+.PHONY: install install-dev test run eda lint clean help
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -8,6 +8,9 @@ install:  ## Install production dependencies
 
 install-dev:  ## Install all dependencies (including dev/test tools)
 	pip install -r requirements-dev.txt
+
+eda:  ## FIRST — company EDA -> reports/eda/
+	python scripts/run_eda.py
 
 test:  ## Run tests
 	pytest tests/ -v
