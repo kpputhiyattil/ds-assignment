@@ -1,6 +1,10 @@
 """
 run_eda.py — invoice-focused exploratory data analysis on Invoices_users.parquet.
 
+Run this **before** training so data design choices are documented first.
+Only needs ``data/raw/Invoices_users.parquet`` (optionally uses processed events
+if already built).
+
 Usage (from project root, venv active):
     python -m src.scripts.run_eda
     # or:

@@ -64,7 +64,7 @@ serve-dev:
 ui:
 	streamlit run app/streamlit_app.py
 
-all: events interval features labels train ablation explain eda assess package batch-assess
+all: eda events interval features labels train ablation explain assess package batch-assess
 
 clean:
 	rm -rf data/processed/* data/artifacts/*

@@ -42,17 +42,107 @@ data/{raw,processed,artifacts} # raw = input; processed/artifacts = generated (g
 ## Setup
 
 ```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"      # or: pip install -r requirements.txt
-pytest                        # smoke tests should pass on a fresh clone
+python -m venv .venv
+# Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+# macOS / Linux:
+# source .venv/bin/activate
+
+pip install -e ".[dev,serving]"   # ML + FastAPI + Streamlit
+# or: pip install -r requirements.txt  &&  pip install -e ".[serving]"
+pytest
 ```
+
+Requires **Python ≥ 3.11**. Always use the **venv** interpreter for uvicorn/streamlit
+(not a system-wide `python.exe`), so dependencies resolve correctly.
+
+## Sharing this project with someone else
+
+### What to send
+
+| Item | Required? | Notes |
+|---|---|---|
+| Project code (repo / zip) | Yes | Source, configs, tests, reports |
+| `data/raw/Invoices_users.parquet` | Yes | **Gitignored** — must share separately |
+| `data/processed/` + `data/artifacts/` | Optional | Skip if you want them to retrain; include to skip the long pipeline |
+
+### Full rebuild (from raw invoices)
+
+Put the parquet at `data/raw/Invoices_users.parquet`, activate the venv, then either:
+
+```bash
+make all
+```
+
+or run each stage (Windows-friendly; same order as `make all`):
+
+```bash
+# 1) EDA BEFORE training
+python -m src.scripts.run_eda
+
+# 2) Feature pipeline
+python -m src.data.ingestion
+python -m src.features.interval
+python -m src.features.build
+python -m src.features.labels
+
+# 3) Train + validate interval value
+python -m src.models.train
+python -m src.models.ablation
+python -m src.explainability.shap_utils
+
+# 4) Assessment AFTER ablation/explain (needs those artifacts)
+python -m src.scripts.run_assessment
+
+# 5) Package dual models + batch report
+python -m src.serving.package
+python -m src.scripts.run_batch_assess
+```
+
+**Order note:** `run_eda` belongs **before** training. `run_assessment` belongs
+**after** `ablation` + `explain` — it reads those artifacts for the with-vs-without
+interval comparison and cannot produce that earlier.
+
+### Serve the API + UI (2 terminals)
+
+```bash
+# Terminal 1 — API (venv python)
+python -m uvicorn src.serving.api:app --host 127.0.0.1 --port 8000
+
+# Terminal 2 — Streamlit UI
+streamlit run app/streamlit_app.py
+```
+
+Or: `make serve` and `make ui`.
+
+### Faster path (artifacts already included)
+
+If you also sent `data/artifacts/serving/churn_decision_model.joblib`:
+
+```bash
+pip install -e ".[dev,serving]"
+python -m uvicorn src.serving.api:app --host 127.0.0.1 --port 8000
+streamlit run app/streamlit_app.py
+```
+
+They still need invoice data to upload (sample CSV/Parquet or the full raw file).
+
+### Sanity checks
+
+| Check | Expected |
+|---|---|
+| `GET http://127.0.0.1:8000/health` | `"status": "ok"` |
+| `GET http://127.0.0.1:8000/model/info` | `"dual_models": true` |
+| EDA | `reports/eda/` |
+| Assessment mini-report | `reports/assessment/mini_report.md` |
+| Batch assessment | `reports/batch_assessment/latest/` |
 
 ## Pipeline run order
 
 Stages are built incrementally. Once implemented, the full run is:
 
 ```bash
-make eda        # invoice EDA (missingness, same-day, gaps) -> reports/eda/
+make eda        # FIRST — invoice EDA (missingness, same-day, gaps) -> reports/eda/
 make events     # raw invoices -> billing_events (same-day aggregation, id check)
 make interval   # historical-only interval inference + confidence
 make features   # X_core / X_gap / X_interval (leakage-safe, per snapshot)
@@ -60,9 +150,15 @@ make labels     # dollar-churn labels (12mo past vs future)
 make train      # LightGBM frequency + severity, temporal CV
 make ablation   # two ablations x temporal folds + significance verdict
 make explain    # SHAP global/local
-make assess     # mini-report from artifacts -> reports/assessment/mini_report.md
+make assess     # AFTER train/ablation — mini-report from artifacts
+make package    # dual with/without-interval serving artifact
+make batch-assess
 # or: make all
 ```
+
+**Order note:** `make eda` belongs **before** training (design / data understanding).
+`make assess` belongs **after** `ablation` + `explain` — it reads those artifacts and
+cannot produce the with-vs-without comparison earlier.
 
 ## Build progress
 
@@ -83,6 +179,8 @@ missing real interval and unblock the Continue/Review/No-Go decision. It is larg
 **redundant with raw gap features** (Ablation 2), so it is optional if those are
 already engineered. See `data/artifacts/ablation_report.json` and the written
 comparison narrative in `reports/assessment/mini_report.md` (`make assess`).
+For submission, use the short written summary:
+`reports/assessment/SUBMISSION_MINI_REPORT.md` (approach, findings, improvements).
 
 ## Serving
 

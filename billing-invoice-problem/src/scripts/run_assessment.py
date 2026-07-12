@@ -1,7 +1,11 @@
 """
 run_assessment.py — build the written mini-report from pipeline artifacts.
 
-Runs on actual-data artifacts already produced by `make all` (ingestion,
+Must run **after** train / ablation / explain (and preferably after EDA).
+It does not train models; it reads existing artifacts and writes the graded
+narrative (with-vs-without interval comparison from ``ablation_report.json``).
+
+Runs on actual-data artifacts already produced by the pipeline (ingestion,
 interval, features, ablation, SHAP) plus optional EDA output.
 
 Usage (from project root, venv active):
